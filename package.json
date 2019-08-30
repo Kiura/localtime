@@ -1,10 +1,10 @@
 {
-  "name": "globaltz",
+  "name": "localtime",
   "version": "1.0.0",
   "description": "Makes it easy to chat with people from all over the globe",
   "main": "index.js",
   "scripts": {
-    "start": "pm2 start index.js"
+    "start": "node index.js"
   },
   "keywords": [
     "timezone",
@@ -21,11 +21,7 @@
     "geo-tz": "^5.0.5",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.26",
-    "node-emoji": "^1.10.0",
-    "pm2": "^3.5.1",
     "telegraf": "^3.32.0",
-    "telegraf-getchatmembers": "^1.0.0",
-    "telegraf-inline-menu": "^3.6.0",
     "telegraf-session-local": "^1.0.2",
     "which-country": "^1.0.0"
   }
