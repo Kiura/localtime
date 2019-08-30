@@ -2,7 +2,6 @@ const me = `89285162`
 const trix = `-304017857`
 
 const Telegraf = require(`telegraf`)
-const telegrafGetChatMembers = require('telegraf-getchatmembers')
 const session = require(`telegraf-session-local`)
 const geoTz = require('geo-tz')
 const moment = require('moment')
@@ -14,7 +13,6 @@ const token = process.env.BOT_TOKEN
 const bot = new Telegraf(token)
 
 // -----
-bot.use(telegrafGetChatMembers)
 const localSession = new session({ 
 	database: `users.json`,
   storage: session.storageFileAsync,
