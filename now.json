@@ -1,0 +1,6 @@
+{
+	"version": 2,
+  "env": {
+    "BOT_TOKEN": "@bot_token"
+  }
+}

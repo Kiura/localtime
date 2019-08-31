@@ -6,24 +6,21 @@ const LocalSession = require(`telegraf-session-local`)
 const geoTz = require('geo-tz')
 const moment = require('moment')
 const mtz = require('moment-timezone')
-const { Composer, log, session } = require('micro-bot');
 
-const members = require(`./members`)
+const members = require(`../members`)
 
 const token = process.env.BOT_TOKEN
-// const bot = new Telegraf(token)
-const bot = new Composer();
+const bot = new Telegraf(token)
 
 // -----
 const localSession = new LocalSession({ 
-	database: `users.json`,
+	database: `/tmp/users.json`,
   storage: LocalSession.storageFileAsync,
 	getSessionKey: (ctx) => {
 		return `users`
 	},
 })
-bot.use(log())
-bot.use(session())
+
 bot.use(localSession.middleware())
 bot.use(async (ctx, next) => {
   const start = new Date()
@@ -203,9 +200,10 @@ bot.hears(`/ltall`, (ctx) => {
 bot.hears(`/lt`, (ctx) => {
 	showLocaltime(ctx, false)
 })
+bot.telegram.setWebhook(`https://localtime.eleutheromaniac.now.sh/api`)
+module.exports = async (req, res) => {
+	console.log(111, req.body)
+	bot.handleUpdate(req.body)
+	res.status(200).send(`ok`);
+}
 
-// bot.telegram.setWebhook('https://ugly-chipmunk-68.localtunnel.me/secret-path')
-
-// bot.launch()
-module.exports = bot
-// module.exports = ({ reply }) => reply('42')
