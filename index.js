@@ -90,8 +90,7 @@ bot.on('inline_query', (ctx) => {
   ctx.answerInlineQuery(result, {cache_time: 60*60, next_offset: offset <= 0 ? '' : offset})
 })
 
-bot.command(['settimezone', 'settimezone/@localtime_bot'], async (ctx) => {
-	console.log(111)
+bot.command(['settimezone', 'settimezone@localtime_bot'], async (ctx) => {
 	const messageArray = ctx.message.text.split(` `)
 	if (messageArray.length < 2) {
 		return ctx.reply(`please use this format: /settimezone YourTimezone. (e.g.: /settimezone Europe/Berlin)`)
@@ -134,7 +133,7 @@ bot.on([`location`], (ctx) => {
 })
 
 
-bot.command('ltu', async (ctx) => {
+bot.command(['ltu','ltu@localtime_bot'], async (ctx) => {
 	const messageArray = ctx.message.text.split(` `)
 	let username = null
 	if (messageArray.length !== 2 || messageArray[1].charAt(0) !== `@`) {
@@ -224,10 +223,10 @@ async function showLocaltime(ctx, all) {
 	return ctx.replyWithHTML(message)
 }
 
-bot.command('ltall', async (ctx) => {
+bot.command(['ltall','ltall@localtime_bot'], async (ctx) => {
 	await showLocaltime(ctx, true)
 })
-bot.command('lt', async (ctx) => {
+bot.command(['lt','lt@localtime_bot'], async (ctx) => {
 	await showLocaltime(ctx, false)
 })
 
