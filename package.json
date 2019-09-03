@@ -4,7 +4,9 @@
   "description": "Makes it easy to chat with people from all over the globe",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "pm2 start index.js --name localtime",
+    "stop": "pm2 stop localtime",
+    "del": "pm2 del localtime"
   },
   "keywords": [
     "timezone",
