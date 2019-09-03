@@ -165,7 +165,9 @@ const addToChatActive = async function (chID, user) {
 		}
 	}
 	if (includes) return
-	chat.active.push(user)
+	if (user.timezone) {
+		chat.active.push(user)
+	}
 	if (chat.active.length > 10) chat.active.shift()
 
 	try {
@@ -272,11 +274,12 @@ module.exports = async function (ctx, next) {
   	const u = await ctx.getOneUser() 
   	if (u) {
   		await ctx.addToChatActive(ctx.getChatID(), u)
+  		await ctx.addToChatAll(ctx.getChatID(), u)
   		return next(ctx)
   	}
+	
 	const user = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
 	if (!user) return next(ctx)
-  
 	const newUser = await ctx.createUser({...user.user, userId: user.id,  status: user.status})
 	await ctx.addToChatAll(ctx.getChatID(), newUser)
 	return next(ctx)
