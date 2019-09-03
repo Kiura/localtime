@@ -234,7 +234,7 @@ bot.hears(/\/lt\b|\/at\b/ig, async (ctx) => {
 	await showLocaltime(ctx, false)
 })
 
-bot.telegram.setWebhook(`https://localtime.glitch.me/bot`)
+bot.telegram.setWebhook(`https://localtime.xyz/bot`)
 
 
 
@@ -248,32 +248,6 @@ app.use(bearerToken())
 
 app.get(`/`, (req, res) => res.send(`ok`))
 
-const prettyBytes = require(`pretty-bytes`)
-app.get(`/info`, (req, res) => res.json({
-  total: `200 MB`,
-  used: prettyBytes(size(`.data/users.json`)),
-  left: prettyBytes(200*1000*1000 - size(`.data/users.json`)),
-}))
-app.post(`/info`, (req, res) => res.json({
-  total: `200 MB`,
-  used: prettyBytes(size(`.data/users.json`)),
-  left: prettyBytes(200*1000*1000 - size(`.data/users.json`)),
-}))
-
-const fs = require(`fs`)
-const token = process.env.TOKEN
-
-const jsonfile = require('jsonfile')
-
-app.post(`/stats`, (req, res) => {
-  if (req.token !== token) return res.json({
-    error: `you don't have access to this endpoint`
-  })
-  const stats = jsonfile.readFileSync(`.data/users.json`)
-  return res.json(stats)
-})
-
-
 // app.use(bot.webhookCallback('/bot'))
 app.post(`/bot`,(req, res)=>{
   bot.handleUpdate(req.body)
@@ -283,13 +257,5 @@ const port = process.env.PORT || 3000
 app.listen(port, () => {
   console.log(`app listening on port ${port}`)
 })
-
-function size(filename) {
-    const stats = fs.statSync(filename)
-    const fileSizeInBytes = stats.size
-    return fileSizeInBytes
-}
-
-
 
 
