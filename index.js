@@ -149,9 +149,11 @@ async function showLocaltime(ctx, all) {
 	if (all) {
 		users = await ctx.getChatAll(chID)
 		if (users && users.length !== 0) users = users.members
+		if (!users) return ctx.reply(`No user has set timezone in this group`)
 	} else {
 		users = await ctx.getChatActive(chID)
 		if (users && users.length !== 0) users = users.active
+		if (!users) return ctx.reply(`No user has set timezone in this group`)
 	}
 
 	let userTime = []
