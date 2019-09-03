@@ -140,7 +140,6 @@ const addToChatAll = async function (chID, user) {
 
 	let includes = false
 	for (let member of chat.members) {
-		if (!member) continue
 		if (member.userId === user.userId) {
 			includes = true
 		}
@@ -161,7 +160,6 @@ const addToChatActive = async function (chID, user) {
 	if (!chat) return
 	let includes = false
 	for (let member of chat.active) {
-		if (!member) continue
 		if (member.userId === user.userId) {
 			includes = true
 		}
@@ -271,9 +269,11 @@ module.exports = async function (ctx, next) {
   		await ctx.createChat({...ctx.chat, chatId: ctx.chat.id})
   	}
 
-  	const u = await ctx.getOneUser()
-  	await ctx.addToChatActive(ctx.getChatID(), u)
-	if (u) return next(ctx)
+  	const u = await ctx.getOneUser() 
+  	if (u) {
+  		await ctx.addToChatActive(ctx.getChatID(), u)
+  		return next(ctx)
+  	}
 	const user = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
 	if (!user) return next(ctx)
   
