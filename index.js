@@ -59,7 +59,8 @@ bot.command(['listtimezones', 'listtimezones@localtime_bot'], async (ctx) => {
 	}
 
 	for (let [i, tz] of Object.entries(currenttzs)) {
-		message += `${tz.name} - ${tz.offsetStr}`
+		message += `${tz.name} - ${tz.offsetStr}
+`
 	}
 	if (!message) return ctx.reply(`could not fetch timezones`)
 	return ctx.reply(message)
