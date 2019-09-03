@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const model = new Schema({
+  memberOf: { type: Schema.Types.ObjectId, ref: 'Chat' },
   userId: { type: Number, required: true, index: true },
   firstName: { type: String },
   lastName: { type: String },
