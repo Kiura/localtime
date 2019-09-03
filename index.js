@@ -112,7 +112,7 @@ bot.command(['settimezone', 'settimezone@localtime_bot'], async (ctx) => {
 		if (!changed){
 	  		return ctx.reply(`Could not set timezone`)
 		}
-		return ctx.reply(`@${ctx.getName(user)} timezone is set to ${tz}`)
+		return ctx.reply(`@${ctx.getName(admin.user)} set timezone to ${tz} for ${ctx.getName(user)}`)
 	}
 
 	const changed = ctx.changeUserTimeZone(ctx.getUserID(), tz)
