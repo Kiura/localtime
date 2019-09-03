@@ -59,14 +59,14 @@ bot.command(['listtimezones', 'listtimezones@localtime_bot'], async (ctx) => {
 	}
 
 	for (let [i, tz] of Object.entries(currenttzs)) {
-		message += `${tz.name}: <b>${tz.offsetStr}</b>
+		message += `${tz.name}: ${tz.offsetStr}
 `
-		if (message.length + `${tz.name} + <b>${tz.offsetStr}</b>`.length + 5 >= 4096) {
-			return ctx.replyWithHTML(`${message}...`)		
+		if (message.length + `${tz.name} + ${tz.offsetStr}`.length + 5 >= 4096) {
+			return ctx.reply(`${message}...`)		
 		}
 	}
 	if (!message) return ctx.reply(`could not fetch timezones`)
-	return ctx.replyWithHTML(message)
+	return ctx.reply(message)
 })
 
 bot.on('inline_query', (ctx) => {
