@@ -1,29 +1,23 @@
-const me = `89285162`
-const trix = `-304017857`
-
 const Telegraf = require(`telegraf`)
 const LocalSession = require(`telegraf-session-local`)
-const geoTz = require('geo-tz')
-const moment = require('moment')
-const mtz = require('moment-timezone')
-const { Composer, log, session } = require('micro-bot');
+const geoTz = require(`geo-tz`)
+const moment = require(`moment`)
+const mtz = require(`moment-timezone`)
 
 const members = require(`./members`)
 
-const token = process.env.BOT_TOKEN
-// const bot = new Telegraf(token)
-const bot = new Composer();
+const bot_token = process.env.BOT_TOKEN
+const bot = new Telegraf(bot_token)
 
 // -----
 const localSession = new LocalSession({ 
-	database: `users.json`,
+	database: `.data/users.json`,
   storage: LocalSession.storageFileAsync,
 	getSessionKey: (ctx) => {
 		return `users`
 	},
 })
-bot.use(log())
-bot.use(session())
+
 bot.use(localSession.middleware())
 bot.use(async (ctx, next) => {
   const start = new Date()
@@ -39,6 +33,9 @@ bot.use( (ctx, next) => {
 	if (users.active[ctx.getChatID()].includes(ctx.getUserID())) {
 		return next()
 	}
+  if (!users[ctx.getUserID()] || !users[ctx.getUserID()].timezone) {
+    return next()
+  }
 	users.active[ctx.getChatID()].push(ctx.getUserID())
 	if (users.active[ctx.getChatID()].length > 10) {
 		users.active[ctx.getChatID()].shift()
@@ -68,16 +65,69 @@ Use /help to display help info
 bot.help((ctx) => ctx.reply(`Use /lt to display local time for 10 last active users.
 Use /ltall to display local time for all users.
 Use /ltu @username to display local time for a user.
-If you pass {local time} to /lt and /ltall it will display local times at that specific time ({local time} could be in any of the following formats: 'hh:mm A', 'h:mm A', 'hhmm A', 'hmm A').
+If you pass {local time} to /lt and /ltall it will display local times at that specific time ({local time} could be in any of the following formats: 'hh:mm A', 'h:mm A', 'hhmm A', 'hmm A', etc...).
 Use /settimezone to set timezone (Example of the command: /settimezone Europe/Berlin).
 Or the easiest way to set timezone is to send current location to the bot or group with this bot.
+Or choose from the dropdown menu which is promted when you type @localtime_bot.
 `))
 
+const ct = require('countries-and-timezones')
+const allTZS = ct.getAllTimezones()
+let tzs = []
+
+for (let key in allTZS) {
+  tzs.push(allTZS[key]) 
+}
+tzs = tzs.sort((a, b) => {
+  const an = a.name.toUpperCase();
+  const bn = b.name.toUpperCase();
+  if (an>bn) return 1
+  else if (an<bn) return -1
+  else return 0
+})
+
+bot.on('inline_query', (ctx) => {
+  let index = 0
+  let currenttzs = tzs
+  let {query, offset} = ctx.update.inline_query
+  offset = 1*offset
+  const result = []
+  if (query !== ``) {
+    currenttzs = tzs.filter((tz)=> tz.name.toUpperCase().includes(query.toUpperCase()))
+  }
+  
+  if (!offset) {
+    if (currenttzs.length > 50) {
+      currenttzs = currenttzs.slice(0, 50)
+      offset = 50
+    }
+  } else {
+    if (currenttzs.length > offset) {
+      if (currenttzs.length - offset > 50) {
+        const size = currenttzs.length - offset > 50 ? 50 : currenttzs.length
+        currenttzs = currenttzs.slice(offset, offset+size)
+        offset = offset+size
+      }
+    }
+  }
+  
+  // if ()
+  for (let [i, tz] of Object.entries(currenttzs)) {
+    result.push({
+      id: i,
+      type: `article`,
+      title: tz.name,
+      description: `UTC offset: ${tz.offsetStr}`,
+      input_message_content: {
+        message_text: `/settimezone ${tz.name}`
+      }
+    })
+  }
+  
+  ctx.answerInlineQuery(result, {cache_time: 60*60, next_offset: offset <= 0 ? '' : offset})
+})
+
 bot.command('settimezone', (ctx) => {
-	// stop if no / present
-	if (!ctx.message.text.includes(`/`)) {
-		return ctx.reply(`please use this format: /settimezone YourTimezone. (e.g.: /settimezone Europe/Berlin)`)
-	}
 	const messageArray = ctx.message.text.split(` `)
 	if (messageArray.length < 2) {
 		return ctx.reply(`please use this format: /settimezone YourTimezone. (e.g.: /settimezone Europe/Berlin)`)
@@ -86,8 +136,10 @@ bot.command('settimezone', (ctx) => {
 	if (!!!mtz.tz.zone(tz)) {
 		return ctx.reply(`${tz} is not a valid timezone`)
 	}
-	ctx.changeUserTimeZone(ctx.getUserID(), tz)
-  return ctx.reply(`@${ctx.from.username} timezone is set to ${tz}`)
+  if (ctx.changeUserTimeZone(ctx.getUserID(), tz)){
+  		return ctx.reply(`@${ctx.getName(ctx.from)} timezone is set to ${tz}`)
+	}
+  return ctx.reply(`Could not set timezone`)
 })
 
 bot.on([`location`], (ctx) => {
@@ -96,7 +148,7 @@ bot.on([`location`], (ctx) => {
   const timezone = geoTz(latitude, longitude)
   const tz = timezone[0]
   if (ctx.changeUserTimeZone(ctx.getUserID(), tz, ctx.message.location)) {
-  	return ctx.reply(`@${ctx.from.username} timezone is set to ${tz}`)
+  	return ctx.reply(`@${ctx.getName(ctx.from)} timezone is set to ${tz}`)
   }
   return ctx.reply(`Could not set timezone`)
 })
@@ -143,7 +195,7 @@ function showLocaltime(ctx, all) {
 
 	let message = ``
 	for (let ut of userTime) {
-		message += `${ut.user.flag || ut.user.country || ''} ${ut.user.user.username} ⏰ <b>${ut.time.format(`hh:mm A`)}</b>
+		message += `${ut.user.flag || ut.user.country || ''} ${ctx.getName(ut.user.user)} ⏰ <b>${ut.time.format(`hh:mm A`)}</b>
 `
 	}
 	if (message === ``) {
@@ -192,20 +244,75 @@ bot.command('ltu', async (ctx) => {
 	if (localTime) {
 		time = moment(localTime).tz(user.timezone).format(`hh:mm A`)
 	}
-	return ctx.replyWithHTML(`${user.flag || user.country || ''} ${user.user.username} ⏰ <b>${time}</b>`)
+	return ctx.replyWithHTML(`${user.flag || user.country || ''} ${ctx.getName(user.user)} ⏰ <b>${time}</b>`)
 })
 
 // all
-bot.hears(`/ltall`, (ctx) => {
+bot.hears(/\/ltall\b|s\/atall\b/ig, (ctx) => {
 	showLocaltime(ctx, true)
 })
 
-bot.hears(`/lt`, (ctx) => {
+bot.hears(/\/lt\b|\/at\b/ig, (ctx) => {
 	showLocaltime(ctx, false)
 })
 
-// bot.telegram.setWebhook('https://ugly-chipmunk-68.localtunnel.me/secret-path')
-
+bot.telegram.setWebhook(`https://localtime.glitch.me/bot`)
 // bot.launch()
-module.exports = bot
-// module.exports = ({ reply }) => reply('42')
+
+
+
+// init project
+const express = require(`express`);
+const app = express()
+app.use(express.json())
+
+const bearerToken = require(`express-bearer-token`)
+app.use(bearerToken())
+
+app.get(`/`, (req, res) => res.send(`ok`))
+
+const prettyBytes = require(`pretty-bytes`)
+app.get(`/info`, (req, res) => res.json({
+  total: `200 MB`,
+  used: prettyBytes(size(`.data/users.json`)),
+  left: prettyBytes(200*1000*1000 - size(`.data/users.json`)),
+}))
+app.post(`/info`, (req, res) => res.json({
+  total: `200 MB`,
+  used: prettyBytes(size(`.data/users.json`)),
+  left: prettyBytes(200*1000*1000 - size(`.data/users.json`)),
+}))
+
+const fs = require(`fs`)
+const token = process.env.TOKEN
+
+const jsonfile = require('jsonfile')
+
+app.post(`/stats`, (req, res) => {
+  if (req.token !== token) return res.json({
+    error: `you don't have access to this endpoint`
+  })
+  const stats = jsonfile.readFileSync(`.data/users.json`)
+  return res.json(stats)
+})
+
+
+// app.use(bot.webhookCallback('/bot'))
+app.post(`/bot`,(req, res)=>{
+  bot.handleUpdate(req.body)
+  res.status(200).send(`ok`)
+})
+const port = process.env.PORT || 3000
+app.listen(port, () => {
+  console.log(`app listening on port ${port}`)
+})
+
+function size(filename) {
+    const stats = fs.statSync(filename)
+    const fileSizeInBytes = stats.size
+    return fileSizeInBytes
+}
+
+
+
+

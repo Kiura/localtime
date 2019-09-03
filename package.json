@@ -4,9 +4,7 @@
   "description": "Makes it easy to chat with people from all over the globe",
   "main": "index.js",
   "scripts": {
-    "start": "micro-bot -d ${NOW_URL} -e",
-    "dev": "nodemon --exec 'micro-bot -e '.env''",
-    "deploy": "now rm $npm_package_name ; now"
+    "start": "node index.js"
   },
   "keywords": [
     "timezone",
@@ -14,16 +12,20 @@
     "team",
     "chat"
   ],
-  "engines" : { "node" : ">=v10.10.0" },
+  "engines": {
+    "node": "v10.15.3"
+  },
   "author": "Kiura Magomadov",
   "license": "MIT",
   "dependencies": {
+    "jsonfile": "^5.0.0",
+    "express-bearer-token": "^2.4.0",
+    "pretty-bytes": "^5.3.0",
+    "express": "^4.17.1",
     "countries-and-timezones": "^1.0.1",
     "country-code-emoji": "^1.0.0",
     "country-iso-3-to-2": "^1.0.1",
-    "express": "^4.17.1",
     "geo-tz": "^5.0.5",
-    "micro-bot": "^2.5.3",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.26",
     "telegraf": "^3.32.0",
@@ -31,6 +33,6 @@
     "which-country": "^1.0.0"
   },
   "devDependencies": {
-    "nodemon": "^1.19.1"
+    "pm2": "^3.5.1"
   }
 }

@@ -3,8 +3,21 @@ const wc = require('which-country')
 const ct = require('countries-and-timezones')
 const getCountryISO2 = require("country-iso-3-to-2")
 
+const getName = function(member) {
+  if (member.username) {
+    return member.username
+  } else if (member.first_name && member.last_name) {
+    return `${member.first_name} ${member.last_name}`
+  } else if (member.first_name) {
+    return member.first_name
+  } else if (member.last_name) {
+    return member.last_name
+  } 
+  return `anonymous`
+}
+
 const getChatID = function () {
-	if (this.from && this.chat) {
+	if (this.chat) {
 		return this.chat.id
 	}
 	return null
@@ -25,10 +38,9 @@ const changeUserTimeZone = function (uID, timezone, location) {
 	users[uID].timezone = timezone
 	if (!location) {
 		const countries = ct.getCountriesForTimezone(timezone)
+    if (countries.length === 0) return false
 		users[uID].country = countries[0].id.toUpperCase()
-		if (users[uID].country) {
-			users[uID].flag = flag(users[uID].country)
-		}
+		users[uID].flag = flag(users[uID].country)
 	} else {
 		const {latitude,longitude} = location
 		const country = wc([longitude,latitude])
@@ -58,12 +70,14 @@ const getUserByUsername = function (username) {
 }
 
 module.exports = async function (ctx, next) {
+	ctx.getName = getName
 	ctx.getChatID = getChatID
 	ctx.getUserID = getUserID
 	ctx.changeUserTimeZone = changeUserTimeZone
 	ctx.getUser = getUser
 	ctx.getUserByUsername = getUserByUsername
-
+  
+  if (ctx.updateType === `inline_query`) return next(ctx)
 	let users = ctx.session.users || {}
 
 	const exists = !!users[ctx.getUserID()]
@@ -71,7 +85,7 @@ module.exports = async function (ctx, next) {
 	if (!member || exists) {
 		return next(ctx)
 	}
-
+  
 	users[ctx.getUserID()] = member
 	ctx.session.users = users
 	return next(ctx)
