@@ -199,7 +199,7 @@ const getChatActive = async function (chID) {
 	if (!chID) {
 		chID = this.getChatID()
 	}
-	const chat = await User.find({chatId: chID})
+	const chat = await User.findOne({chatId: chID})
 	.populate({
 		path: 'active',
 	});
