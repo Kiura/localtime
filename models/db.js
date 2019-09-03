@@ -134,7 +134,7 @@ const createChat = async function (chat) {
 }
 
 const addToChatAll = async function (chID, user) {
-	const chat = await this.getAllChat(chID)
+	const chat = await this.getChatAll(chID)
 	if (!chat) return
 
 	let includes = false
@@ -211,7 +211,7 @@ const getChatAll = async function (chID) {
 	if (!chID) {
 		chID = this.getChatID()
 	}
-	const chat = await User.find({chatId: chID})
+	const chat = await User.findOne({chatId: chID})
 	.populate({
 		path: 'members',
 	});
@@ -262,6 +262,10 @@ module.exports = async function (ctx, next) {
 	ctx.changeUserTimeZone = changeUserTimeZone
 
   	if (ctx.updateType === `inline_query`) return next(ctx)
+
+  	if (ctx.getChatID() && ctx.chat && !ctx.chatExists(ctx.getChatID())) {
+  		ctx.createChat(ctx.chat)
+  	}
 
   	const u = ctx.getUser()
   	ctx.addToChatActive(ctx.getChatID(), u)
