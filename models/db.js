@@ -37,17 +37,11 @@ const getName = function(user) {
 }
 
 const getChatID = function () {
-	if (this.chat) {
-		return this.chat.id
-	}
-	return
+	if (this.chat) return this.chat.id
 }
 
 const getUserID = function () {
-	if (this.from) {
-		return this.from.id
-	}
-	return
+	if (this.from) return this.from.id
 }
 
 const editUser = async function (user) {
@@ -94,18 +88,16 @@ const getUsers = async function () {
 
 const getOneUser = async function (uID) {
 	if (!this.isDBReady()) return
-	if (!uID) {
-		uID = this.getUserID()
-	}
+	if (!uID) uID = this.getUserID()
+
 	const user = await User.findOne({userId: uID})
 	return user
 }
 
 const userExists = async function (uID) {
 	if (!this.isDBReady()) return
-	if (!uID) {
-		uID = this.getUserID()
-	}
+	if (!uID) uID = this.getUserID()
+
 	const exists = await User.exists({userId: uID})
 	return exists
 }
@@ -180,50 +172,59 @@ const addToChatActive = async function (chID, user) {
 
 const getOneChat = async function (chID) {
 	if (!this.isDBReady()) return
-	if (!chID) {
-		chID = this.getChatID()
-	}
+	if (!chID) chID = this.getChatID()
+
 	const chat = await User.findOne({chatId: chID})
 	return chat
 }
 
 const chatExists = async function (chID) {
 	if (!this.isDBReady()) return
-	if (!chID) {
-		chID = this.getChatID()
-	}
+	if (!chID) chID = this.getChatID()
+
 	const exists = await Chat.exists({chatId: chID})
 	return exists
 }
 
+const isMemberOf = async function (uID, chID) {
+	if (!this.isDBReady()) return
+	if (!uID) uID = this.getUserID()
+	if (!chID) chID = this.getChatID()
+
+	const chat = await Chat
+		.findOne({chatId: chID})
+		.populate({
+			path: 'members',
+			match: {
+				userId: uID,
+			},
+		})
+	if (!chat || !chat.members) return false
+	return chat.members.length === 1
+}
+
+
 const getChatActive = async function (chID) {
 	if (!this.isDBReady()) return
-	if (!chID) {
-		chID = this.getChatID()
-	}
+	if (!chID) chID = this.getChatID()
+
 	const chat = await Chat.findOne({chatId: chID})
-	.populate({
-		path: 'active',
-	});
+	.populate('active');
 	return chat
 }
 
 const getChatAll = async function (chID) {
 	if (!this.isDBReady()) return
-	if (!chID) {
-		chID = this.getChatID()
-	}
+	if (!chID) chID = this.getChatID()
+
 	const chat = await Chat.findOne({chatId: chID})
-	.populate({
-		path: 'members',
-	});
+	.populate('members');
 	return chat
 }
 
 const changeUserTimeZone = function (uID, timezone, location) {
-	if (!uID) {
-		uID = this.getUserID()
-	}
+	if (!uID) uID = this.getUserID()
+
 	let user = {}
 	user.timezone = timezone
 	if (!location) {
@@ -259,6 +260,7 @@ module.exports = async function (ctx, next) {
 	ctx.addToChatActive = addToChatActive
 	ctx.getOneChat = getOneChat
 	ctx.chatExists = chatExists
+	ctx.isMemberOf = isMemberOf
 	ctx.getChatActive = getChatActive
 	ctx.getChatAll = getChatAll
 	ctx.changeUserTimeZone = changeUserTimeZone

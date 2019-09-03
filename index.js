@@ -108,6 +108,10 @@ bot.command(['settimezone', 'settimezone@localtime_bot'], async (ctx) => {
 		// TODO: get only for this group
 		const user = await ctx.getUserByUsername(username.substring(1))
 		if (!user) return ctx.reply(`no user with username ${username}`)
+		if (user.timezone) return ctx.reply(`cannot change timezone for a user who has already set it`)
+		if (!ctx.isMemberOf(user.userId, ctx.getChatID())) {
+			return ctx.reply(`cannot set timezone for a user who is not a member of this group`)
+		}
 		const changed = ctx.changeUserTimeZone(user.userId, tz)
 		if (!changed){
 	  		return ctx.reply(`Could not set timezone`)
@@ -161,6 +165,9 @@ bot.command(['ltu','ltu@localtime_bot'], async (ctx) => {
 	const user = await ctx.getUserByUsername(username.substring(1))
 	if (!user || !!!mtz.tz.zone(user.timezone)) {
 		return ctx.reply(`user has not set timezone or set to incorrect one: ${user.timezone}`)
+	}
+	if (!ctx.isMemberOf(user.userId, ctx.getChatID())) {
+		return ctx.reply(`cannot get timezone of a user who is not a member of this group`)
 	}
 	let time = mtz().tz(user.timezone).format(`hh:mm A`)
 	if (localTime) {
