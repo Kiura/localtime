@@ -224,7 +224,7 @@ bot.command('ltu', async (ctx) => {
 	if (localTime) {
 		time = moment(localTime).tz(user.timezone).format(`hh:mm A`)
 	}
-	return ctx.replyWithHTML(`${user.flag || user.country || ''} ${ctx.getName(user.user)} ⏰ <b>${time}</b>`)
+	return ctx.replyWithHTML(`${user.flag || user.country || ''} ${ctx.getName(user)} ⏰ <b>${time}</b>`)
 })
 
 // all
