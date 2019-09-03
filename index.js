@@ -66,7 +66,7 @@ bot.command(['listtimezones', 'listtimezones@localtime_bot'], async (ctx) => {
 		}
 	}
 	if (!message) return ctx.reply(`could not fetch timezones`)
-	return ctx.reply(message)
+	return ctx.replyWithHTML(message)
 })
 
 bot.on('inline_query', (ctx) => {
