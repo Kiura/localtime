@@ -4,9 +4,9 @@ const wc = require(`which-country`)
 const ct = require(`countries-and-timezones`)
 const getCountryISO2 = require(`country-iso-3-to-2`)
 const User = require(`./user`)
+const Chat = require(`./chat`)
 
-const mongourl = process.env.MONGO_URL || `mongodb://localhost/`
-console.log(1111, process.env.MONGO_URL)
+const mongourl = process.env.MONGO_URL || `mongodb+srv://user:password@website.com/test?retryWrites=true&w=majority`
 mongoose.connect(mongourl, {useNewUrlParser: true, useCreateIndex: true})
 const db = mongoose.connection
 let IS_DB_READY = false
@@ -260,7 +260,9 @@ module.exports = async function (ctx, next) {
 	ctx.getChatActive = getChatActive
 	ctx.getChatAll = getChatAll
 	ctx.changeUserTimeZone = changeUserTimeZone
-  
+  	
+  	console.log(`works`)
+  	
   	if (ctx.updateType === `inline_query`) return next(ctx)
 
   	const u = ctx.getUser()
