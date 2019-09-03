@@ -26,12 +26,14 @@ Use /help to display help info
 `))
 
 bot.help((ctx) => ctx.reply(`Use /lt to display local time for 10 last active users.
-Use /ltall to display local time for all users.
-Use /ltu @username to display local time for a user.
+Use /ltall {local time} to display local time for all users.
+Use /ltu {local time} @username to display local time for a user.
 If you pass {local time} to /lt and /ltall it will display local times at that specific time ({local time} could be in any of the following formats: 'hh:mm A', 'h:mm A', 'hhmm A', 'hmm A', etc...).
-Use /settimezone to set timezone (Example of the command: /settimezone Europe/Berlin).
+Use /settimezone {timezone} to set timezone (Example of the command: /settimezone Europe/Berlin).
 Or the easiest way to set timezone is to send current location to the bot or group with this bot.
 Or choose from the dropdown menu which is promted when you type @localtime_bot.
+Admins can use /settimezone {timezone} @username to set timezone for any user in the group (if user has not set it already).
+Use /listtimezones {filter} to list timezones. only 9 items shown at most to reduce cluttering the chat
 `))
 
 const ct = require('countries-and-timezones')
