@@ -105,7 +105,8 @@ bot.command(['settimezone', 'settimezone@localtime_bot'], async (ctx) => {
 			return ctx.reply(`only admins can set timezone for members`)
 		}
 		const username = messageArray[2]
-		const user = await ctx.getUserByUsername(username)
+		// TODO: get only for this group
+		const user = await ctx.getUserByUsername(username.substring(1))
 		if (!user) return ctx.reply(`no user with username ${username}`)
 		const changed = ctx.changeUserTimeZone(user.userId, tz)
 		if (!changed){
