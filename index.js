@@ -101,7 +101,7 @@ bot.command(['settimezone', 'settimezone@localtime_bot'], async (ctx) => {
 	}
 	if (messageArray.length === 3) {
 		const admin = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
-		if (admin.status === 'creator' || admin.status === 'creator') {
+		if (admin.status !== 'creator' && admin.status !== 'administrator') {
 			return ctx.reply(`only admins can set timezone for members`)
 		}
 		const username = messageArray[2]
