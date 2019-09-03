@@ -4,57 +4,20 @@ const geoTz = require(`geo-tz`)
 const moment = require(`moment`)
 const mtz = require(`moment-timezone`)
 
-const members = require(`./members`)
+const db = require(`../models/db`)
 
 const bot_token = process.env.BOT_TOKEN
 const bot = new Telegraf(bot_token)
 
-// -----
-const localSession = new LocalSession({ 
-	database: `.data/users.json`,
-  storage: LocalSession.storageFileAsync,
-	getSessionKey: (ctx) => {
-		return `users`
-	},
-})
 
-bot.use(localSession.middleware())
 bot.use(async (ctx, next) => {
   const start = new Date()
   await next()
   const ms = new Date() - start
   console.log(`Response time %sms`, ms)
 })
-bot.use(members)
-bot.use( (ctx, next) => {
-	let users = ctx.session.users || {}
-	if (!users.active) users.active = {}
-	if (!users.active[ctx.getChatID()]) users.active[ctx.getChatID()] = []
-	if (users.active[ctx.getChatID()].includes(ctx.getUserID())) {
-		return next()
-	}
-  if (!users[ctx.getUserID()] || !users[ctx.getUserID()].timezone) {
-    return next()
-  }
-	users.active[ctx.getChatID()].push(ctx.getUserID())
-	if (users.active[ctx.getChatID()].length > 10) {
-		users.active[ctx.getChatID()].shift()
-	}
-	ctx.session.users = users
-	return next()
-})
 
-bot.use( (ctx, next) => {
-	let users = ctx.session.users || {}
-	if (!users.all) users.all = {}
-	if (!users.all[ctx.getChatID()]) users.all[ctx.getChatID()] = []
-	if (users.all[ctx.getChatID()].includes(ctx.getUserID())) {
-		return next()
-	}
-	users.all[ctx.getChatID()].push(ctx.getUserID())
-	ctx.session.users = users
-	return next()
-})
+bot.use(db)
 
 // -----
 bot.start((ctx) => ctx.reply(`Hello, this bot is only useful when you add it to a group.
@@ -127,7 +90,7 @@ bot.on('inline_query', (ctx) => {
   ctx.answerInlineQuery(result, {cache_time: 60*60, next_offset: offset <= 0 ? '' : offset})
 })
 
-bot.command('settimezone', (ctx) => {
+bot.command('settimezone', async (ctx) => {
 	const messageArray = ctx.message.text.split(` `)
 	if (messageArray.length < 2) {
 		return ctx.reply(`please use this format: /settimezone YourTimezone. (e.g.: /settimezone Europe/Berlin)`)
@@ -136,14 +99,27 @@ bot.command('settimezone', (ctx) => {
 	if (!!!mtz.tz.zone(tz)) {
 		return ctx.reply(`${tz} is not a valid timezone`)
 	}
-  if (ctx.changeUserTimeZone(ctx.getUserID(), tz)){
-  		return ctx.reply(`@${ctx.getName(ctx.from)} timezone is set to ${tz}`)
+	if (messageArray.length === 3]) {
+		const admin = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
+		if (admin.status === 'creator' || admin.status === 'creator') {
+			return ctx.reply(`only admins can set timezone for members`)
+		}
+		const username = messageArray[2]
+		const user = await ctx.getUserByUsername(username)
+		if (!user) return ctx.reply(`no user with username ${username}`)
+		if (!ctx.changeUserTimeZone(user.userId, tz)){
+	  		return ctx.reply(`Could not set timezone`)
+		}
+		return ctx.reply(`@${ctx.getName(user)} timezone is set to ${tz}`)
 	}
-  return ctx.reply(`Could not set timezone`)
+
+  	if (!ctx.changeUserTimeZone(ctx.getUserID(), tz)){
+  		return ctx.reply(`Could not set timezone`)
+	}
+  	return ctx.reply(`@${ctx.getName(ctx.from)} timezone is set to ${tz}`)
 })
 
 bot.on([`location`], (ctx) => {
-	// if (ctx.chat.username) {}
   const {latitude,longitude} = ctx.message.location
   const timezone = geoTz(latitude, longitude)
   const tz = timezone[0]
@@ -153,31 +129,33 @@ bot.on([`location`], (ctx) => {
   return ctx.reply(`Could not set timezone`)
 })
 
-function showLocaltime(ctx, all) {
-	const m = ctx.message.text.substring(ctx.message.text.toLowerCase().indexOf(`/tz`))
+async function showLocaltime(ctx, all) {
+	const m = ctx.message.text.substring(ctx.message.text.toLowerCase().indexOf(`/lt`))
 	const messageArray = m.split(` `)
 	let localTime;
 	if (messageArray.length > 1) {
 		messageArray.shift()
 		const lt = messageArray.join(``)
-		const currentUser = ctx.getUser(ctx.getUserID())
+		const currentUser = await ctx.getUser(ctx.getUserID())
 		const parsedTime = mtz(lt, ['hh:mm A', 'h:m A', 'h:mm A', 'hhmm A', 'hmm A'])
 		localTime = mtz().tz(currentUser.timezone)
 		localTime.set('hour', parsedTime.get('hour'))
 		localTime.set('minutes', parsedTime.get('minutes'))
 	}
 
+	// TODO: here
 	const chID = ctx.getChatID()
-	let users = ctx.session.users || {}
-	let usersIDs = users.active[ctx.getChatID()]
+	const users = []
 	if (all) {
-		usersIDs = users.all[ctx.getChatID()]
+		users = await ctx.getChatAll(chID)
+		users = users.members
+	} else {
+		users = await ctx.getChatActive(chID)
+		users = users.active
 	}
 
 	let userTime = []
-	for (let uID of usersIDs) {
-		if (uID === true || uID === false) continue 
-		const user = ctx.getUser(uID)
+	for (let user of users) {
 		if (!user.timezone || !!!mtz.tz.zone(user.timezone)) continue
 		if (localTime) {
 			userTime.push({user:user, time:moment(localTime).tz(user.timezone)})
@@ -205,10 +183,10 @@ function showLocaltime(ctx, all) {
 }
 
 bot.command('ltall', async (ctx) => {
-	showLocaltime(ctx, true)
+	await showLocaltime(ctx, true)
 })
 bot.command('lt', async (ctx) => {
-	showLocaltime(ctx, false)
+	await showLocaltime(ctx, false)
 })
 
 
@@ -224,7 +202,7 @@ bot.command('ltu', async (ctx) => {
 	if (messageArray.length > 1) {
 		messageArray.shift()
 		const lt = messageArray.join(``)
-		const currentUser = ctx.getUser(ctx.getUserID())
+		const currentUser = await ctx.getUser(ctx.getUserID())
 		const parsedTime = mtz(lt, ['hh:mm A', 'h:m A', 'h:mm A', 'hhmm A', 'hmm A'])
 		if (currentUser && currentUser.timezone && parsedTime) {
 			localTime = mtz().tz(currentUser.timezone)
@@ -248,16 +226,15 @@ bot.command('ltu', async (ctx) => {
 })
 
 // all
-bot.hears(/\/ltall\b|s\/atall\b/ig, (ctx) => {
-	showLocaltime(ctx, true)
+bot.hears(/\/ltall\b|s\/atall\b/ig, async (ctx) => {
+	await showLocaltime(ctx, true)
 })
 
-bot.hears(/\/lt\b|\/at\b/ig, (ctx) => {
-	showLocaltime(ctx, false)
+bot.hears(/\/lt\b|\/at\b/ig, async (ctx) => {
+	await showLocaltime(ctx, false)
 })
 
 bot.telegram.setWebhook(`https://localtime.glitch.me/bot`)
-// bot.launch()
 
 
 
