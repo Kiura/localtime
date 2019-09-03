@@ -55,7 +55,10 @@ bot.command(['listtimezones', 'listtimezones@localtime_bot'], async (ctx) => {
 	const messageArray = ctx.message.text.split(` `)
 	if (messageArray.length === 2) {
 		const query = messageArray[1]
-		currenttzs = tzs.filter((tz)=> tz.name.toUpperCase().includes(query.toUpperCase()))
+		currenttzs = tzs.filter((tz)=> {
+			return tz.name.toUpperCase().includes(query.toUpperCase()) 
+				|| tz.offsetStr.toUpperCase().includes(query.toUpperCase())
+		})
 	}
 
 	for (let [i, tz] of Object.entries(currenttzs)) {
@@ -76,7 +79,10 @@ bot.on('inline_query', (ctx) => {
   offset = 1*offset
   const result = []
   if (query !== ``) {
-    currenttzs = tzs.filter((tz)=> tz.name.toUpperCase().includes(query.toUpperCase()))
+    currenttzs = tzs.filter((tz)=> {
+		return tz.name.toUpperCase().includes(query.toUpperCase()) 
+		|| tz.offsetStr.toUpperCase().includes(query.toUpperCase())
+	})
   }
   
   if (!offset) {
