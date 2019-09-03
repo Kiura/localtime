@@ -204,7 +204,7 @@ bot.command('ltu', async (ctx) => {
 	if (messageArray.length > 1) {
 		messageArray.shift()
 		const lt = messageArray.join(``)
-		const currentUser = await ctx.getUserOne(ctx.getUserID())
+		const currentUser = await ctx.getOneUser(ctx.getUserID())
 		const parsedTime = mtz(lt, ['hh:mm A', 'h:m A', 'h:mm A', 'hhmm A', 'hmm A'])
 		if (currentUser && currentUser.timezone && parsedTime) {
 			localTime = mtz().tz(currentUser.timezone)
