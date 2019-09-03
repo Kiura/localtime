@@ -64,7 +64,7 @@ bot.command(['listtimezones', 'listtimezones@localtime_bot'], async (ctx) => {
 	for (let [i, tz] of Object.entries(currenttzs)) {
 		message += `${tz.name}: ${tz.offsetStr}
 `
-		if (i > 3) {
+		if (i > 7) {
 			return ctx.reply(`${message}...`)		
 		}
 	}
