@@ -261,17 +261,15 @@ module.exports = async function (ctx, next) {
 	ctx.getChatAll = getChatAll
 	ctx.changeUserTimeZone = changeUserTimeZone
   	
-  	console.log(`works`)
-  	
   	if (ctx.updateType === `inline_query`) return next(ctx)
 
   	const u = ctx.getUser()
-  	ctx.addToChatActive(ctx.getChatId(), u)
+  	ctx.addToChatActive(ctx.getChatID(), u)
 	if (u) return next(ctx)
 	const user = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
 	if (!user) return next(ctx)
   
 	const newUser = ctx.createUser({...user.user, status: user.status})
-	ctx.addToChatAll(ctx.getChatId(), newUser)
+	ctx.addToChatAll(ctx.getChatID(), newUser)
 	return next(ctx)
 }
