@@ -23,7 +23,7 @@ const isDBReady = function() {
 } 
 
 const getName = function(user) {
-	if (!user) throw `no user`
+	if (!user) throw new Error(`no user`)
 	if (user.username) {
 		return user.username
 	} else if (user.first_name && user.last_name) {
