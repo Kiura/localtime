@@ -157,7 +157,7 @@ const addToChatAll = async function (chID, user) {
 const addToChatActive = async function (chID, user) {
 	const chat = await this.getChatActive(chID)
 	if (!chat) return
-
+	console.log(111, chat)
 	let includes = false
 	for (let member of chat.active) {
 		if (member.userId === user.userId) {
@@ -260,7 +260,7 @@ module.exports = async function (ctx, next) {
 	ctx.getChatActive = getChatActive
 	ctx.getChatAll = getChatAll
 	ctx.changeUserTimeZone = changeUserTimeZone
-  	
+
   	if (ctx.updateType === `inline_query`) return next(ctx)
 
   	const u = ctx.getUser()
