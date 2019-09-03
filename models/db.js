@@ -266,16 +266,16 @@ module.exports = async function (ctx, next) {
 	const exists = await ctx.chatExists(ctx.getChatID())
   	if (ctx.getChatID() && ctx.chat && !exists) {
   		const chat = ctx.getOneChat(ctx.chat.id)
-  		ctx.createChat({...ctx.chat, chatId: ctx.chat.id})
+  		await ctx.createChat({...ctx.chat, chatId: ctx.chat.id})
   	}
 
-  	const u = ctx.getUser()
-  	ctx.addToChatActive(ctx.getChatID(), u)
+  	const u = await ctx.getOneUser()
+  	await ctx.addToChatActive(ctx.getChatID(), u)
 	if (u) return next(ctx)
 	const user = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
 	if (!user) return next(ctx)
   
-	const newUser = ctx.createUser({...user.user, userId: user.id,  status: user.status})
-	ctx.addToChatAll(ctx.getChatID(), newUser)
+	const newUser = await ctx.createUser({...user.user, userId: user.id,  status: user.status})
+	await ctx.addToChatAll(ctx.getChatID(), newUser)
 	return next(ctx)
 }
