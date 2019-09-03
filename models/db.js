@@ -190,7 +190,7 @@ const chatExists = async function (chID) {
 	if (!chID) {
 		chID = this.getChatID()
 	}
-	const exists = await Chat.exists({userId: chID})
+	const exists = await Chat.exists({chatId: chID})
 	return exists
 }
 
