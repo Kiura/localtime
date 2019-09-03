@@ -49,6 +49,22 @@ tzs = tzs.sort((a, b) => {
   else return 0
 })
 
+bot.command(['listtimezones', 'listtimezones@localtime_bot'], async (ctx) => {
+	let message = ``
+	let currenttzs = tzs
+	const messageArray = ctx.message.text.split(` `)
+	if (messageArray.length === 2) {
+		const query = messageArray[1]
+		currenttzs = tzs.filter((tz)=> tz.name.toUpperCase().includes(query.toUpperCase()))
+	}
+
+	for (let [i, tz] of Object.entries(currenttzs)) {
+		message += `${tz.name} - ${tz.offsetStr}`
+	}
+	if (!message) return ctx.reply(`could not fetch timezones`)
+	return ctx.reply(message)
+})
+
 bot.on('inline_query', (ctx) => {
   let index = 0
   let currenttzs = tzs
@@ -74,7 +90,6 @@ bot.on('inline_query', (ctx) => {
     }
   }
   
-  // if ()
   for (let [i, tz] of Object.entries(currenttzs)) {
     result.push({
       id: i,
