@@ -91,7 +91,7 @@ const getUsers = async function () {
 	return users
 }
 
-const getUser = async function (uID) {
+const getOneUser = async function (uID) {
 	if (!this.isDBReady()) return
 	if (!uID) {
 		uID = this.getUserID()
@@ -176,7 +176,7 @@ const addToChatActive = async function (chID, user) {
 	}
 }
 
-const getChat = async function (chID) {
+const getOneChat = async function (chID) {
 	if (!this.isDBReady()) return
 	if (!chID) {
 		chID = this.getChatID()
@@ -249,13 +249,13 @@ module.exports = async function (ctx, next) {
 	ctx.editUser = editUser
 	ctx.createUser = createUser
 	ctx.getUsers = getUsers
-	ctx.getUser = getUser
+	ctx.getOneUser = getOneUser
 	ctx.userExists = userExists
 	ctx.getUserByUsername = getUserByUsername
 	ctx.createChat = createChat
 	ctx.addToChatAll = addToChatAll
 	ctx.addToChatActive = addToChatActive
-	ctx.getChat = getChat
+	ctx.getOneChat = getOneChat
 	ctx.chatExists = chatExists
 	ctx.getChatActive = getChatActive
 	ctx.getChatAll = getChatAll
@@ -265,6 +265,7 @@ module.exports = async function (ctx, next) {
 
 	const exists = await ctx.chatExists(ctx.getChatID())
   	if (ctx.getChatID() && ctx.chat && !exists) {
+  		const chat = ctx.getOneChat(ctx.chat.id)
   		ctx.createChat({...ctx.chat, chatId: ctx.chat.id})
   	}
 
