@@ -157,7 +157,6 @@ const addToChatAll = async function (chID, user) {
 
 const addToChatActive = async function (chID, user) {
 	const chat = await this.getChatActive(chID)
-	console.log(111, chat)
 	if (!chat) return
 	let includes = false
 	for (let member of chat.active) {
