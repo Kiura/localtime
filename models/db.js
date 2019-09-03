@@ -140,6 +140,7 @@ const addToChatAll = async function (chID, user) {
 
 	let includes = false
 	for (let member of chat.members) {
+		if (!member) continue
 		if (member.userId === user.userId) {
 			includes = true
 		}
@@ -160,6 +161,7 @@ const addToChatActive = async function (chID, user) {
 	if (!chat) return
 	let includes = false
 	for (let member of chat.active) {
+		if (!member) continue
 		if (member.userId === user.userId) {
 			includes = true
 		}
