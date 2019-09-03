@@ -91,6 +91,7 @@ bot.on('inline_query', (ctx) => {
 })
 
 bot.command('settimezone', async (ctx) => {
+	console.log(111)
 	const messageArray = ctx.message.text.split(` `)
 	if (messageArray.length < 2) {
 		return ctx.reply(`please use this format: /settimezone YourTimezone. (e.g.: /settimezone Europe/Berlin)`)
@@ -107,26 +108,29 @@ bot.command('settimezone', async (ctx) => {
 		const username = messageArray[2]
 		const user = await ctx.getUserByUsername(username)
 		if (!user) return ctx.reply(`no user with username ${username}`)
-		if (!ctx.changeUserTimeZone(user.userId, tz)){
+		const changed = ctx.changeUserTimeZone(user.userId, tz)
+		if (!changed){
 	  		return ctx.reply(`Could not set timezone`)
 		}
 		return ctx.reply(`@${ctx.getName(user)} timezone is set to ${tz}`)
 	}
 
-  	if (!ctx.changeUserTimeZone(ctx.getUserID(), tz)){
+	const changed = ctx.changeUserTimeZone(ctx.getUserID(), tz)
+  	if (!changed) {
   		return ctx.reply(`Could not set timezone`)
 	}
   	return ctx.reply(`@${ctx.getName(ctx.from)} timezone is set to ${tz}`)
 })
 
 bot.on([`location`], (ctx) => {
-  const {latitude,longitude} = ctx.message.location
-  const timezone = geoTz(latitude, longitude)
-  const tz = timezone[0]
-  if (ctx.changeUserTimeZone(ctx.getUserID(), tz, ctx.message.location)) {
-  	return ctx.reply(`@${ctx.getName(ctx.from)} timezone is set to ${tz}`)
-  }
-  return ctx.reply(`Could not set timezone`)
+	const {latitude,longitude} = ctx.message.location
+	const timezone = geoTz(latitude, longitude)
+	const tz = timezone[0]
+	const changed = ctx.changeUserTimeZone(ctx.getUserID(), tz, ctx.message.location)
+	if (!changed) {
+		return ctx.reply(`Could not set timezone`)
+	}
+	return ctx.reply(`@${ctx.getName(ctx.from)} timezone is set to ${tz}`)
 })
 
 async function showLocaltime(ctx, all) {
