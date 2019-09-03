@@ -148,10 +148,10 @@ async function showLocaltime(ctx, all) {
 	let users = []
 	if (all) {
 		users = await ctx.getChatAll(chID)
-		users = users.members
+		if (users.length !== 0) users = users.members
 	} else {
 		users = await ctx.getChatActive(chID)
-		users = users.active
+		if (users.length !== 0) users = users.active
 	}
 
 	let userTime = []
