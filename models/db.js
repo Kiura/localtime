@@ -263,7 +263,8 @@ module.exports = async function (ctx, next) {
 
   	if (ctx.updateType === `inline_query`) return next(ctx)
 
-  	if (ctx.getChatID() && ctx.chat && !ctx.chatExists(ctx.getChatID())) {
+	const exists = await ctx.chatExists(ctx.getChatID())
+  	if (ctx.getChatID() && ctx.chat && !exists) {
   		ctx.createChat(ctx.chat)
   	}
 
