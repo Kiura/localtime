@@ -185,12 +185,13 @@ async function showLocaltime(ctx, all) {
 		const lt = messageArray.join(``)
 		const currentUser = await ctx.getOneUser(ctx.getUserID())
 		const parsedTime = mtz(lt, ['hh:mm A', 'h:m A', 'h:mm A', 'hhmm A', 'hmm A'])
+		if (!parsedTime) return ctx.reply(`Please provide a time in one of following formats: hh:mm A, h:m A, h:mm A, hhmm A, hmm A`)
 		localTime = mtz().tz(currentUser.timezone)
+		if (!localTime) return ctx.reply(`could not get timezone for current user, please set your timezone in order to check other users timezone`)
 		localTime.set('hour', parsedTime.get('hour'))
 		localTime.set('minutes', parsedTime.get('minutes'))
 	}
 
-	// TODO: here
 	const chID = ctx.getChatID()
 	let users = []
 	if (all) {
