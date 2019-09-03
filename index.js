@@ -145,7 +145,7 @@ async function showLocaltime(ctx, all) {
 
 	// TODO: here
 	const chID = ctx.getChatID()
-	const users = []
+	let users = []
 	if (all) {
 		users = await ctx.getChatAll(chID)
 		users = users.members
