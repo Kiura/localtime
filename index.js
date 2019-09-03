@@ -90,7 +90,7 @@ bot.on('inline_query', (ctx) => {
   ctx.answerInlineQuery(result, {cache_time: 60*60, next_offset: offset <= 0 ? '' : offset})
 })
 
-bot.command('settimezone', async (ctx) => {
+bot.command(['settimezone', 'settimezone/@localtime_bot'], async (ctx) => {
 	console.log(111)
 	const messageArray = ctx.message.text.split(` `)
 	if (messageArray.length < 2) {
@@ -131,6 +131,42 @@ bot.on([`location`], (ctx) => {
 		return ctx.reply(`Could not set timezone`)
 	}
 	return ctx.reply(`@${ctx.getName(ctx.from)} timezone is set to ${tz}`)
+})
+
+
+bot.command('ltu', async (ctx) => {
+	const messageArray = ctx.message.text.split(` `)
+	let username = null
+	if (messageArray.length !== 2 || messageArray[1].charAt(0) !== `@`) {
+		return ctx.reply(`please provide a valid username`)
+	}
+	username = messageArray[1]
+
+	let localTime;
+	if (messageArray.length > 1) {
+		messageArray.shift()
+		const lt = messageArray.join(``)
+		const currentUser = await ctx.getOneUser(ctx.getUserID())
+		const parsedTime = mtz(lt, ['hh:mm A', 'h:m A', 'h:mm A', 'hhmm A', 'hmm A'])
+		if (currentUser && currentUser.timezone && parsedTime) {
+			localTime = mtz().tz(currentUser.timezone)
+			if (localTime) {
+				localTime.set('hour', parsedTime.get('hour'))
+				localTime.set('minutes', parsedTime.get('minutes'))
+			}
+		}
+	}
+
+	// TODO: only allow to get user from this group
+	const user = await ctx.getUserByUsername(username.substring(1))
+	if (!user || !!!mtz.tz.zone(user.timezone)) {
+		return ctx.reply(`user has not set timezone or set to incorrect one: ${user.timezone}`)
+	}
+	let time = mtz().tz(user.timezone).format(`hh:mm A`)
+	if (localTime) {
+		time = moment(localTime).tz(user.timezone).format(`hh:mm A`)
+	}
+	return ctx.replyWithHTML(`${user.flag || user.country || ''} ${ctx.getName(user)} ⏰ <b>${time}</b>`)
 })
 
 async function showLocaltime(ctx, all) {
@@ -193,42 +229,6 @@ bot.command('ltall', async (ctx) => {
 })
 bot.command('lt', async (ctx) => {
 	await showLocaltime(ctx, false)
-})
-
-
-bot.command('ltu', async (ctx) => {
-	const messageArray = ctx.message.text.split(` `)
-	let username = null
-	if (messageArray.length !== 2 || messageArray[1].charAt(0) !== `@`) {
-		return ctx.reply(`please provide a valid username`)
-	}
-	username = messageArray[1]
-
-	let localTime;
-	if (messageArray.length > 1) {
-		messageArray.shift()
-		const lt = messageArray.join(``)
-		const currentUser = await ctx.getOneUser(ctx.getUserID())
-		const parsedTime = mtz(lt, ['hh:mm A', 'h:m A', 'h:mm A', 'hhmm A', 'hmm A'])
-		if (currentUser && currentUser.timezone && parsedTime) {
-			localTime = mtz().tz(currentUser.timezone)
-			if (localTime) {
-				localTime.set('hour', parsedTime.get('hour'))
-				localTime.set('minutes', parsedTime.get('minutes'))
-			}
-		}
-	}
-
-	// TODO: only allow to get user from this group
-	const user = await ctx.getUserByUsername(username.substring(1))
-	if (!user || !!!mtz.tz.zone(user.timezone)) {
-		return ctx.reply(`user has not set timezone or set to incorrect one: ${user.timezone}`)
-	}
-	let time = mtz().tz(user.timezone).format(`hh:mm A`)
-	if (localTime) {
-		time = moment(localTime).tz(user.timezone).format(`hh:mm A`)
-	}
-	return ctx.replyWithHTML(`${user.flag || user.country || ''} ${ctx.getName(user)} ⏰ <b>${time}</b>`)
 })
 
 // all
