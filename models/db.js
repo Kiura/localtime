@@ -6,7 +6,8 @@ const getCountryISO2 = require(`country-iso-3-to-2`)
 const User = require(`./user`)
 
 const mongourl = process.env.MONGO_URL || `mongodb://localhost/`
-mongoose.connect(mongourl, {useNewUrlParser: true})
+console.log(1111, process.env.MONGO_URL)
+mongoose.connect(mongourl, {useNewUrlParser: true, useCreateIndex: true})
 const db = mongoose.connection
 let IS_DB_READY = false
 db.on('error', (err)=>{
@@ -108,7 +109,7 @@ const userExists = async function (uID) {
 	return exists
 }
 
-const getUserByUsername = function (username) {
+const getUserByUsername = async function (username) {
 	if (!this.isDBReady()) return
 	const user = await User.findOne({username: username})
 	return user

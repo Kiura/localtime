@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const model = new Schema({
   members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   active: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  chatId: { type: Integer, required: true },
+  chatId: { type: Number, required: true },
   type: { type: String, enum: ['private', 'group', 'supergroup', 'channel'] },
   title: { type: String },
   firstName: { type: String },

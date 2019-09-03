@@ -4,7 +4,7 @@ const geoTz = require(`geo-tz`)
 const moment = require(`moment`)
 const mtz = require(`moment-timezone`)
 
-const db = require(`../models/db`)
+const db = require(`./models/db`)
 
 const bot_token = process.env.BOT_TOKEN
 const bot = new Telegraf(bot_token)
@@ -99,7 +99,7 @@ bot.command('settimezone', async (ctx) => {
 	if (!!!mtz.tz.zone(tz)) {
 		return ctx.reply(`${tz} is not a valid timezone`)
 	}
-	if (messageArray.length === 3]) {
+	if (messageArray.length === 3) {
 		const admin = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
 		if (admin.status === 'creator' || admin.status === 'creator') {
 			return ctx.reply(`only admins can set timezone for members`)
