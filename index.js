@@ -175,7 +175,7 @@ async function showLocaltime(ctx, all) {
 
 	let message = ``
 	for (let ut of userTime) {
-		message += `${ut.user.flag || ut.user.country || ''} ${ctx.getName(ut.user.user)} ⏰ <b>${ut.time.format(`hh:mm A`)}</b>
+		message += `${ut.user.flag || ut.user.country || ''} ${ctx.getName(ut.user)} ⏰ <b>${ut.time.format(`hh:mm A`)}</b>
 `
 	}
 	if (message === ``) {

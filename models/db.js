@@ -23,16 +23,17 @@ const isDBReady = function() {
 } 
 
 const getName = function(user) {
-  if (user.username) {
-    return user.username
-  } else if (user.first_name && user.last_name) {
-    return `${user.first_name} ${user.last_name}`
-  } else if (user.first_name) {
-    return user.first_name
-  } else if (user.last_name) {
-    return user.last_name
-  } 
-  return `anonymous`
+	if (!user) throw `no user`
+	if (user.username) {
+		return user.username
+	} else if (user.first_name && user.last_name) {
+		return `${user.first_name} ${user.last_name}`
+	} else if (user.first_name) {
+		return user.first_name
+	} else if (user.last_name) {
+		return user.last_name
+	} 
+	return `anonymous`
 }
 
 const getChatID = function () {
