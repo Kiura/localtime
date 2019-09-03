@@ -265,7 +265,7 @@ module.exports = async function (ctx, next) {
 
 	const exists = await ctx.chatExists(ctx.getChatID())
   	if (ctx.getChatID() && ctx.chat && !exists) {
-  		const chat = ctx.getOneChat(ctx.chat.id)
+  		const chat = ctx.getChat(ctx.chat.id)
   		await ctx.createChat({...ctx.chat, chatId: ctx.chat.id})
   	}
 
