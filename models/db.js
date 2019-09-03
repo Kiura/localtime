@@ -51,8 +51,7 @@ const getUserID = function () {
 
 const editUser = async function (user) {
 	if (!this.isDBReady()) return
-
-	let u = await User.find({userId: user.userId})
+	let u = await User.findOne({userId: user.userId})
 	if (!u) {
 		console.log(`no such user found in the db`)
 		return
@@ -63,6 +62,7 @@ const editUser = async function (user) {
 	if (user.timezone) u.timezone = user.timezone
 	if (user.country) u.country = user.country
 	if (user.flag) u.flag = user.flag
+	await u.save()
 }
 
 const createUser = async function (user) {
@@ -237,7 +237,7 @@ const changeUserTimeZone = function (uID, timezone, location) {
 			user.flag = flag(user.country)
 		}
 	}
-	this.editUser(user)
+	this.editUser({...user, userId: uID})
 	return true
 }
 
