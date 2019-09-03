@@ -156,8 +156,8 @@ const addToChatAll = async function (chID, user) {
 
 const addToChatActive = async function (chID, user) {
 	const chat = await this.getChatActive(chID)
-	if (!chat) return
 	console.log(111, chat)
+	if (!chat) return
 	let includes = false
 	for (let member of chat.active) {
 		if (member.userId === user.userId) {
@@ -199,7 +199,7 @@ const getChatActive = async function (chID) {
 	if (!chID) {
 		chID = this.getChatID()
 	}
-	const chat = await User.findOne({chatId: chID})
+	const chat = await Chat.findOne({chatId: chID})
 	.populate({
 		path: 'active',
 	});
@@ -211,7 +211,7 @@ const getChatAll = async function (chID) {
 	if (!chID) {
 		chID = this.getChatID()
 	}
-	const chat = await User.findOne({chatId: chID})
+	const chat = await Chat.findOne({chatId: chID})
 	.populate({
 		path: 'members',
 	});
