@@ -24,14 +24,19 @@ const isDBReady = function() {
 
 const getName = function(user) {
 	if (!user) throw new Error(`no user`)
-	if (user.username) {
-		return user.username
-	} else if (user.first_name && user.last_name) {
-		return `${user.first_name} ${user.last_name}`
-	} else if (user.first_name) {
-		return user.first_name
-	} else if (user.last_name) {
-		return user.last_name
+	const u = {
+		username: user.username,
+		firstName: user.firstName || user.first_name,
+		lastName: user.lastName || user.last_name,
+	}
+	if (u.username) {
+		return u.username
+	} else if (u.firstName && u.last_name) {
+		return `${u.firstName} ${u.last_name}`
+	} else if (u.firstName) {
+		return u.firstName
+	} else if (u.last_name) {
+		return u.last_name
 	} 
 	return `anonymous`
 }
@@ -283,6 +288,7 @@ module.exports = async function (ctx, next) {
 	const user = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
 	if (!user) return next(ctx)
 	const newUser = await ctx.createUser({...user.user, userId: user.id,  status: user.status})
+  	await ctx.addToChatActive(ctx.getChatID(), newUser)
 	await ctx.addToChatAll(ctx.getChatID(), newUser)
 	return next(ctx)
 }
