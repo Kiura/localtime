@@ -17,7 +17,7 @@ bot.use(async (ctx, next) => {
 	hour = start.getHours(),
 	minute = start.getMinutes(),
 	second = start.getSeconds()
-  	console.log(`${houdr}:${minute}:${second} response time ${ms}`)
+  	console.log(`${hour}:${minute}:${second} response time ${ms}`)
 })
 
 bot.use(db)
