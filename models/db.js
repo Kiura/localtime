@@ -161,11 +161,18 @@ const addToChatActive = async function (chID, user) {
 			includes = true
 		}
 	}
-	if (includes) return
+	if (includes) {
+		console.log(`already in active: ${user}`)
+		return
+	}
 	if (user.timezone) {
+		console.log(`added to active: ${user}`)
 		chat.active.push(user)
 	}
-	if (chat.active.length > 10) chat.active.shift()
+	if (chat.active.length > 10) {
+		const u = chat.active.shift()
+		console.log(`removed from active: ${u}`)
+	}
 
 	try {
 		await chat.save()
