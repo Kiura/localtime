@@ -11,10 +11,13 @@ const bot = new Telegraf(bot_token)
 
 
 bot.use(async (ctx, next) => {
-  const start = new Date()
-  await next()
-  const ms = new Date() - start
-  console.log(`${start} response time ${ms}`)
+	const start = new Date()
+	await next()
+	const ms = new Date() - start
+	hour = start.getHours(),
+	minute = start.getMinutes(),
+	second = start.getSeconds()
+  	console.log(`${houdr}:${minute}:${second} response time ${ms}`)
 })
 
 bot.use(db)
