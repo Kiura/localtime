@@ -8,6 +8,7 @@ const model = new Schema({
   chatId: { type: Number, required: true },
   type: { type: String, enum: ['private', 'group', 'supergroup', 'channel'] },
   title: { type: String },
+  timeFormat: { type: String, enum: ['12', '24'] },
   firstName: { type: String },
   lastName: { type: String },
   username: { type: String },
