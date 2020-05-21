@@ -301,6 +301,8 @@ bot.command(['feedback', 'feedback@localtime_bot'], async (ctx) => {
   } else if (message.substring(0, shortCommand.length) == shortCommand) {
     message = message.substring(shortCommand.length + 1, message.length)
   }
+  const user = await ctx.getOneUser()
+  message = `@${user.username} ${message}`
 
   bot.telegram.sendMessage(eleutheromaniac95, message, {
     parse_mode: `MarkdownV2`
