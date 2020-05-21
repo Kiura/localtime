@@ -296,10 +296,10 @@ bot.hears(/\/lt\b|\/at\b/ig, async (ctx) => {
 bot.hears(/^\/sendtoall/ig, async (ctx) => {
   if (ctx.getUserID() != 89285162) return ctx.reply(`you are not allowed to use this command`)
   const messageArray = ctx.message.text.split(` `)
-  if (messageArray.length !== 2) {
+  if (messageArray.length < 2) {
     return ctx.reply(`empty message`)
   }
-  const message = messageArray[1]
+  const message = ctx.message.text.substring(11, ctx.message.text.length)
 
   const users = await ctx.getUsers()
   for (const user of users) {
@@ -309,8 +309,8 @@ bot.hears(/^\/sendtoall/ig, async (ctx) => {
   }
 })
 
-// bot.telegram.setWebhook(`https://d5417da0.ngrok.io/bot`)
-bot.telegram.setWebhook(`https://localtime.xyz/bot`)
+bot.telegram.setWebhook(`https://d5417da0.ngrok.io/bot`)
+// bot.telegram.setWebhook(`https://localtime.xyz/bot`)
 
 
 // init project
