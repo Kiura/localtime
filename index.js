@@ -309,8 +309,8 @@ bot.hears(/^\/sendtoall/ig, async (ctx) => {
   }
 })
 
-bot.telegram.setWebhook(`https://d5417da0.ngrok.io/bot`)
-// bot.telegram.setWebhook(`https://localtime.xyz/bot`)
+// bot.telegram.setWebhook(`https://d5417da0.ngrok.io/bot`)
+bot.telegram.setWebhook(`https://localtime.xyz/bot`)
 
 
 // init project
