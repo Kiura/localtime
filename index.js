@@ -8,6 +8,8 @@ const db = require(`./models/db`)
 const bot_token = process.env.BOT_TOKEN
 const bot = new Telegraf(bot_token)
 
+const eleutheromaniac95 = 89285162
+
 bot.use(async (ctx, next) => {
   const start = new Date()
   await next()
@@ -34,8 +36,9 @@ Use /settimezone {timezone} to set timezone (Example of the command: /settimezon
 Or the easiest way to set timezone is to send current location to the bot or group with this bot.
 Or choose from the dropdown menu which is promted when you type @localtime_bot.
 Admins can use /settimezone {timezone} @username to set timezone for any user in the group (if user has not set it already).
-Use /listtimezones {filter} to list timezones. only 9 items shown at most to reduce cluttering the chat
+Use /listtimezones {filter} to list timezones. only 9 items shown at most to reduce cluttering the chat.
 Use /settimeformat {format} to specify whether you want 24 or 12 (AM/PM) based time format (Example of the command: /settimeformat 24 or /settimeformat 12).
+Use /feedback {message} to send me any feedback :)
 `
 
 bot.command(['help@localtime_bot'], (ctx) => ctx.reply(helpMessage))
@@ -284,6 +287,26 @@ bot.command(['lt', 'lt@localtime_bot'], async (ctx) => {
   await showLocaltime(ctx, false)
 })
 
+bot.command(['feedback', 'feedback@localtime_bot'], async (ctx) => {
+  const messageArray = ctx.message.text.split(` `)
+  if (messageArray.length < 2) {
+    return ctx.reply(`empty message`)
+  }
+  let message = ctx.message.text
+  const shortCommand = '/feedback'
+  const longCommand = '/feedback@localtime_bot'
+
+  if (message.substring(0, longCommand.length) == longCommand) {
+    message = message.substring(longCommand.length + 1, message.length)
+  } else if (message.substring(0, shortCommand.length) == shortCommand) {
+    message = message.substring(shortCommand.length + 1, message.length)
+  }
+
+  bot.telegram.sendMessage(eleutheromaniac95, message, {
+    parse_mode: `MarkdownV2`
+  })
+})
+
 // all
 bot.hears(/\/ltall\b|s\/atall\b/ig, async (ctx) => {
   await showLocaltime(ctx, true)
@@ -294,7 +317,7 @@ bot.hears(/\/lt\b|\/at\b/ig, async (ctx) => {
 })
 
 bot.hears(/^\/sendtoall/ig, async (ctx) => {
-  if (ctx.getUserID() != 89285162) return ctx.reply(`you are not allowed to use this command`)
+  if (ctx.getUserID() != eleutheromaniac95) return ctx.reply(`you are not allowed to use this command`)
   const messageArray = ctx.message.text.split(` `)
   if (messageArray.length < 2) {
     return ctx.reply(`empty message`)
