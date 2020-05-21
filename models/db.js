@@ -266,9 +266,9 @@ exportDB.changeUserTimeZone = function (uID, timezone, location) {
   let user = {}
   user.timezone = timezone
   if (!location) {
-    const countries = ct.getCountriesForTimezone(timezone)
-    if (countries.length !== 0) {
-      user.country = countries[0].id.toUpperCase()
+    const country = ct.getCountryForTimezone(timezone)
+    if (country && country.id) {
+      user.country = country.id
       user.flag = flag(user.country)
     }
   } else {
