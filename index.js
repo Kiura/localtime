@@ -38,6 +38,7 @@ Or choose from the dropdown menu which is promted when you type @localtime_bot.
 Admins can use /settimezone {timezone} @username to set timezone for any user in the group (if user has not set it already).
 Use /listtimezones {filter} to list timezones. only 9 items shown at most to reduce cluttering the chat.
 Use /settimeformat {format} to specify whether you want 24 or 12 (AM/PM) based time format (Example of the command: /settimeformat 24 or /settimeformat 12).
+Use /add - to add a user to this chat (example: /add Teddy Europe/Berlin)
 Use /feedback {message} to send me any feedback :)
 `
 
