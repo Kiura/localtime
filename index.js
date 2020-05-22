@@ -376,11 +376,15 @@ bot.hears(/^\/sendtoall/ig, async (ctx) => {
   }
   const message = ctx.message.text.substring(11, ctx.message.text.length)
 
-  const users = await ctx.getUsers()
-  for (const user of users) {
-    bot.telegram.sendMessage(user.userId, message, {
-      parse_mode: `MarkdownV2`
-    })
+  try {
+    const users = await ctx.getUsers()
+    for (const user of users) {
+      bot.telegram.sendMessage(user.userId, message, {
+        parse_mode: `MarkdownV2`
+      })
+    }
+  } catch (e) {
+    console.log(e)
   }
 })
 
