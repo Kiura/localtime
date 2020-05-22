@@ -123,6 +123,28 @@ bot.on('inline_query', (ctx) => {
   ctx.answerInlineQuery(result, { cache_time: 60 * 60, next_offset: offset <= 0 ? '' : offset })
 })
 
+bot.command(['add', 'add@localtime_bot'], async (ctx) => {
+  const messageArray = ctx.message.text.split(` `)
+  if (messageArray.length < 3) {
+    return ctx.reply(`please use this format: /add {prefered username} {timezone}. (e.g.: /add Teddy Europe/Berlin)`)
+  }
+  const username = messageArray[1]
+  const timezone = messageArray[2]
+  if (!!!mtz.tz.zone(timezone)) {
+    return ctx.reply(`${timezone} is not a valid timezone`)
+  }
+  let user = await ctx.getUserByUsername(username)
+  if (!user) {
+    user = await ctx.createUser({ username: username, id: +('11111' + Math.floor(100000000 + Math.random() * 900000000)) })
+    ctx.changeUserTimeZone(user.userId, timezone)
+  }
+  if (await ctx.isMemberOf(user.userId, ctx.getChatID())) {
+    return ctx.reply(`cannot add: already added to this chat`)
+  }
+  await ctx.addToChatAll(ctx.getChatID(), user)
+  return ctx.replyWithHTML(`user <b>${user.username}</b> is succesfully added to this chat`)
+})
+
 bot.command(['settimeformat', 'settimeformat@localtime_bot'], async (ctx) => {
   const messageArray = ctx.message.text.split(` `)
   if (messageArray.length < 2 || (messageArray[1] != `24` && messageArray[1] != `12`)) {
@@ -152,7 +174,8 @@ bot.command(['settimezone', 'settimezone@localtime_bot'], async (ctx) => {
     const user = await ctx.getUserByUsername(username.substring(1))
     if (!user) return ctx.reply(`no user with username ${username}`)
     if (user.timezone) return ctx.reply(`cannot change timezone for a user who has already set it`)
-    if (!ctx.isMemberOf(user.userId, ctx.getChatID())) {
+    const isMemberOf = await ctx.isMemberOf(user.userId, ctx.getChatID())
+    if (!isMemberOf) {
       return ctx.reply(`cannot set timezone for a user who is not a member of this group`)
     }
     ctx.changeUserTimeZone(user.userId, tz)
@@ -203,7 +226,8 @@ bot.command(['ltu', 'ltu@localtime_bot'], async (ctx) => {
   if (!user || !!!mtz.tz.zone(user.timezone)) {
     return ctx.reply(`user has not set timezone or set to incorrect one: ${user.timezone}`)
   }
-  if (!ctx.isMemberOf(user.userId, ctx.getChatID())) {
+  const isMemberOf = await ctx.isMemberOf(user.userId, ctx.getChatID())
+  if (!isMemberOf) {
     return ctx.reply(`cannot get timezone of a user who is not a member of this group`)
   }
   let format = `hh:mm A`
@@ -334,7 +358,7 @@ bot.hears(/^\/sendtoall/ig, async (ctx) => {
   }
 })
 
-// bot.telegram.setWebhook(`https://d5417da0.ngrok.io/bot`)
+// bot.telegram.setWebhook(`https://4fbff081.ngrok.io/bot`)
 bot.telegram.setWebhook(`https://localtime.xyz/bot`)
 
 
