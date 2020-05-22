@@ -129,7 +129,10 @@ bot.command(['add', 'add@localtime_bot'], async (ctx) => {
   if (messageArray.length < 3) {
     return ctx.reply(`please use this format: /add {prefered username} {timezone}. (e.g.: /add Teddy Europe/Berlin)`)
   }
-  const username = messageArray[1]
+  const chat = await ctx.getOneChat(ctx.getChatID())
+  let prefix = chat.username || chat.title || chat.firstName || chat.lastName
+  if (!prefix) prefix = Math.floor(100000000 + Math.random() * 900000000)
+  const username = `(${prefix}) ${messageArray[1]}`
   const timezone = messageArray[2]
   if (!!!mtz.tz.zone(timezone)) {
     return ctx.reply(`${timezone} is not a valid timezone`)
@@ -144,6 +147,28 @@ bot.command(['add', 'add@localtime_bot'], async (ctx) => {
   }
   await ctx.addToChatAll(ctx.getChatID(), user)
   return ctx.replyWithHTML(`user <b>${user.username}</b> is succesfully added to this chat`)
+})
+
+bot.command(['remove', 'remove@localtime_bot'], async (ctx) => {
+  const messageArray = ctx.message.text.split(` `)
+  if (messageArray.length < 2) {
+    return ctx.reply(`please use this format: /remove {username}. (e.g.: /remove Teddy)`)
+  }
+  const username = ctx.message.text.substring("remove ".length + 1)
+  let user = await ctx.getUserByUsername(username)
+  if (!user) {
+    return ctx.reply(`no such user`)
+  }
+  const isMemberOf = await ctx.isMemberOf(user.userId, ctx.getChatID())
+  if (!isMemberOf) {
+    return ctx.reply(`cannot remove: user is not added to this chat`)
+  }
+  const userId = '' + user.userId
+  if (userId.substring(0, 5) != 11111) {
+    return ctx.reply(`cannot remove: is not manually added`)
+  }
+  await ctx.removeFromChatAll(ctx.getChatID(), user)
+  return ctx.replyWithHTML(`user <b>${user.username}</b> is succesfully removed from this chat`)
 })
 
 bot.command(['settimeformat', 'settimeformat@localtime_bot'], async (ctx) => {
@@ -359,8 +384,8 @@ bot.hears(/^\/sendtoall/ig, async (ctx) => {
   }
 })
 
-// bot.telegram.setWebhook(`https://4fbff081.ngrok.io/bot`)
-bot.telegram.setWebhook(`https://localtime.xyz/bot`)
+bot.telegram.setWebhook(`https://4fbff081.ngrok.io/bot`)
+// bot.telegram.setWebhook(`https://localtime.xyz/bot`)
 
 
 // init project

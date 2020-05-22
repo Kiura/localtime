@@ -178,6 +178,28 @@ exportDB.addToChatAll = async function (chID, user) {
   }
 }
 
+exportDB.removeFromChatAll = async function (chID, user) {
+  const chat = await this.getChatAll(chID)
+  if (!chat) return
+
+  let removed = false
+  for (let i = chat.members.length - 1; i >= 0; --i) {
+    if (chat.members[i].userId === user.userId) {
+      chat.members.splice(i, 1)
+      removed = true
+      break
+    }
+  }
+  if (!removed) return
+
+  try {
+    await chat.save()
+  } catch (err) {
+    console.log(`cannot remove from the group: ${err}`)
+    return
+  }
+}
+
 exportDB.addToChatActive = async function (chID, user) {
   const chat = await this.getChatActive(chID)
   if (!chat) return
@@ -298,6 +320,7 @@ module.exports = async function (ctx, next) {
   ctx.createChat = exportDB.createChat
   ctx.addToChatAll = exportDB.addToChatAll
   ctx.addToChatActive = exportDB.addToChatActive
+  ctx.removeFromChatAll = exportDB.removeFromChatAll
   ctx.getOneChat = exportDB.getOneChat
   ctx.chatExists = exportDB.chatExists
   ctx.isMemberOf = exportDB.isMemberOf
