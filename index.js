@@ -67,7 +67,6 @@ bot.command(['listtimezones', 'listtimezones@localtime_bot'], async (ctx) => {
     const query = messageArray[1]
     currenttzs = tzs.filter((tz) => {
       return tz.toUpperCase().includes(query.toUpperCase())
-        || tz.offsetStr.toUpperCase().includes(query.toUpperCase())
     })
   }
 
