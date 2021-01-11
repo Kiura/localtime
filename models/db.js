@@ -150,7 +150,7 @@ exportDB.editChat = async function (chat) {
 exportDB.enableAutoAdd = async function (chat) {
   const success = await this.editChat({
     chatId: chat.chatId,
-    isAutoAddEnabled: true,
+    idAutoAddEnabled: true,
   })
   return success
 }
@@ -386,7 +386,7 @@ module.exports = async function (ctx, next) {
   }
 
   const u = await ctx.getOneUser()
-  if (u && ctx.getChatID() && ctx.chat && ctx.chat.isAutoAddEnabled) {
+  if (u && ctx.getChatID() && ctx.chat && (ctx.chat.isAutoAddEnabled === undefined || ctx.chat.isAutoAddEnabled)) {
     await ctx.addToChatActive(ctx.getChatID(), u)
     await ctx.addToChatAll(ctx.getChatID(), u)
     return next(ctx)
@@ -395,7 +395,7 @@ module.exports = async function (ctx, next) {
   const user = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
   if (!user) return next(ctx)
   const newUser = await ctx.createUser({ ...user.user, userId: user.id, status: user.status })
-  if (ctx.getChatID() && ctx.chat && ctx.chat.isAutoAddEnabled) {
+  if (ctx.getChatID() && ctx.chat && (ctx.chat.isAutoAddEnabled === undefined || ctx.chat.isAutoAddEnabled)) {
     await ctx.addToChatActive(ctx.getChatID(), newUser)
     await ctx.addToChatAll(ctx.getChatID(), newUser)
   }
