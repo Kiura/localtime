@@ -80,8 +80,8 @@ bot.command(['disableautoadd', 'disableautoadd@localtime_bot'], async (ctx) => {
   }
   const chat = await ctx.getOneChat(ctx.getChatID())
   if (chat.isAutoAddEnabled === false) return ctx.reply(`auto add already disabled`)
-  const enabled = await ctx.disableAutoAdd(chat);
-  if (enabled) return ctx.reply(`could not disable auto add`)
+  const disabled = await ctx.disableAutoAdd(chat);
+  if (disabled) return ctx.reply(`could not disable auto add`)
   ctx.reply(`successfully disabled auto add`)
 })
 

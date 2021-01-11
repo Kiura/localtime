@@ -141,6 +141,7 @@ exportDB.editChat = async function (chat) {
   try {
     await c.save()
   } catch (error) {
+    console.log("editChat error", error);
     return false
   }
   return true
