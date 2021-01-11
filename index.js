@@ -69,10 +69,7 @@ bot.command(['enableautoadd', 'enableautoadd@localtime_bot'], async (ctx) => {
   const chat = await ctx.getOneChat(ctx.getChatID())
   if (chat.isAutoAddEnabled) return ctx.reply(`auto add already enabled`)
   const enabled = await ctx.enableAutoAdd(chat);
-  if (enabled) {
-    console.log(111, enabled);
-    return ctx.reply(`could not enable auto add`)
-  }
+  if (!enabled) return ctx.reply(`could not enable auto add`)
   ctx.reply(`successfully enabled auto add`)
 })
 
@@ -84,7 +81,7 @@ bot.command(['disableautoadd', 'disableautoadd@localtime_bot'], async (ctx) => {
   const chat = await ctx.getOneChat(ctx.getChatID())
   if (chat.isAutoAddEnabled === false) return ctx.reply(`auto add already disabled`)
   const disabled = await ctx.disableAutoAdd(chat);
-  if (disabled) return ctx.reply(`could not disable auto add`)
+  if (!disabled) return ctx.reply(`could not disable auto add`)
   ctx.reply(`successfully disabled auto add`)
 })
 
