@@ -138,6 +138,7 @@ exportDB.editChat = async function (chat) {
   if (chat.isAutoAddEnabled === true || chat.isAutoAddEnabled === false) {
     c.isAutoAddEnabled = chat.isAutoAddEnabled
   }
+  console.log(111, chat);
   try {
     await c.save()
   } catch (error) {
