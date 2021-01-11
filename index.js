@@ -39,7 +39,7 @@ Admins can use /settimezone {timezone} @username to set timezone for any user in
 Use /listtimezones {filter} to list timezones. only 9 items shown at most to reduce cluttering the chat.
 Use /settimeformat {format} to specify whether you want 24 or 12 (AM/PM) based time format (Example of the command: /settimeformat 24 or /settimeformat 12).
 Use /enableautoadd to enable auto add functionality. Any user in the chat will be added (if location is set for the user) to the lists and will be shown when /lt or /ltall commands are used (enabled by default)
-Use /disableautoadd to disable auto add functionality. Admin need to add users manually
+Use /disableautoadd to disable auto add functionality. Admin needs to add users manually
 Use /add - to add a user to this chat (example: /add Teddy Europe/Berlin)
 Use /feedback {message} to send me any feedback :)
 `
@@ -68,7 +68,7 @@ bot.command(['enableautoadd', 'enableautoadd@localtime_bot'], async (ctx) => {
   }
   const chat = await ctx.getOneChat(ctx.getChatID())
   if (chat.isAutoAddEnabled) return ctx.reply(`auto add already enabled`)
-  const enabled = await chat.enableAutoAdd(chat);
+  const enabled = await ctx.enableAutoAdd(chat);
   if (enabled) return ctx.reply(`could not enable auto add`)
   ctx.reply(`successfully enabled auto add`)
 })
@@ -80,7 +80,7 @@ bot.command(['disableautoadd', 'disableautoadd@localtime_bot'], async (ctx) => {
   }
   const chat = await ctx.getOneChat(ctx.getChatID())
   if (chat.isAutoAddEnabled === false) return ctx.reply(`auto add already disabled`)
-  const enabled = await chat.disableAutoAdd(chat);
+  const enabled = await ctx.disableAutoAdd(chat);
   if (enabled) return ctx.reply(`could not disable auto add`)
   ctx.reply(`successfully disabled auto add`)
 })
