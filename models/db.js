@@ -147,7 +147,7 @@ exportDB.editChat = async function (chat) {
 }
 
 exportDB.enableAutoAdd = async function (chat) {
-  const success = await c.editChat({
+  const success = await this.editChat({
     chatId: chat.chatId,
     isAutoAddEnabled: true,
   })
@@ -155,7 +155,7 @@ exportDB.enableAutoAdd = async function (chat) {
 }
 
 exportDB.disableAutoAdd = async function (chat) {
-  const success = await c.editChat({
+  const success = await this.editChat({
     chatId: chat.chatId,
     isAutoAddEnabled: false,
   })
