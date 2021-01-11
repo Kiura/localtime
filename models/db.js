@@ -123,11 +123,11 @@ exportDB.getUserByUsername = async function (username) {
 }
 
 exportDB.editChat = async function (chat) {
-  if (!this.isDBReady()) return
+  if (!this.isDBReady()) return false
   let c = await Chat.findOne({ chatId: chat.chatId })
   if (!c) {
     console.log(`no such chat found in the db`)
-    return
+    return false
   }
   if (chat.type) c.type = chat.type
   if (chat.title) c.title = chat.title
@@ -135,7 +135,31 @@ exportDB.editChat = async function (chat) {
   if (chat.firstName) c.firstName = chat.firstName
   if (chat.lastName) c.lastName = chat.lastName
   if (chat.username) c.username = chat.username
-  await c.save()
+  if (chat.isAutoAddEnabled === true || chat.isAutoAddEnabled === false) {
+    c.isAutoAddEnabled = chat.isAutoAddEnabled
+  }
+  try {
+    await c.save()
+  } catch (error) {
+    return false
+  }
+  return true
+}
+
+exportDB.enableAutoAdd = async function (chat) {
+  const success = await c.editChat({
+    chatId: chat.chatId,
+    isAutoAddEnabled: true,
+  })
+  return success
+}
+
+exportDB.disableAutoAdd = async function (chat) {
+  const success = await c.editChat({
+    chatId: chat.chatId,
+    isAutoAddEnabled: false,
+  })
+  return success
 }
 
 exportDB.createChat = async function (chat) {
@@ -186,6 +210,28 @@ exportDB.removeFromChatAll = async function (chID, user) {
   for (let i = chat.members.length - 1; i >= 0; --i) {
     if (chat.members[i].userId === user.userId) {
       chat.members.splice(i, 1)
+      removed = true
+      break
+    }
+  }
+  if (!removed) return
+
+  try {
+    await chat.save()
+  } catch (err) {
+    console.log(`cannot remove from the group: ${err}`)
+    return
+  }
+}
+
+exportDB.removeFromChatActive = async function (chID, user) {
+  const chat = await this.getChatActive(chID)
+  if (!chat) return
+
+  let removed = false
+  for (let i = chat.active.length - 1; i >= 0; --i) {
+    if (chat.active[i].userId === user.userId) {
+      chat.active.splice(i, 1)
       removed = true
       break
     }
@@ -317,10 +363,13 @@ module.exports = async function (ctx, next) {
   ctx.userExists = exportDB.userExists
   ctx.getUserByUsername = exportDB.getUserByUsername
   ctx.editChat = exportDB.editChat
+  ctx.enableAutoAdd = exportDB.enableAutoAdd
+  ctx.disableAutoAdd = exportDB.disableAutoAdd
   ctx.createChat = exportDB.createChat
   ctx.addToChatAll = exportDB.addToChatAll
   ctx.addToChatActive = exportDB.addToChatActive
   ctx.removeFromChatAll = exportDB.removeFromChatAll
+  ctx.removeFromChatActive = exportDB.removeFromChatActive
   ctx.getOneChat = exportDB.getOneChat
   ctx.chatExists = exportDB.chatExists
   ctx.isMemberOf = exportDB.isMemberOf
@@ -331,13 +380,12 @@ module.exports = async function (ctx, next) {
   if (ctx.updateType === `inline_query`) return next(ctx)
 
   const exists = await ctx.chatExists(ctx.getChatID())
-  if (ctx.getChatID() && ctx.chat && !exists) {
-    const chat = ctx.getChat(ctx.chat.id)
+  if (ctx.chat && !exists) {
     await ctx.createChat({ ...ctx.chat, chatId: ctx.chat.id })
   }
 
   const u = await ctx.getOneUser()
-  if (u) {
+  if (u && ctx.getChatID() && ctx.chat && ctx.chat.isAutoAddEnabled) {
     await ctx.addToChatActive(ctx.getChatID(), u)
     await ctx.addToChatAll(ctx.getChatID(), u)
     return next(ctx)
@@ -346,8 +394,10 @@ module.exports = async function (ctx, next) {
   const user = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
   if (!user) return next(ctx)
   const newUser = await ctx.createUser({ ...user.user, userId: user.id, status: user.status })
-  await ctx.addToChatActive(ctx.getChatID(), newUser)
-  await ctx.addToChatAll(ctx.getChatID(), newUser)
+  if (ctx.getChatID() && ctx.chat && ctx.chat.isAutoAddEnabled) {
+    await ctx.addToChatActive(ctx.getChatID(), newUser)
+    await ctx.addToChatAll(ctx.getChatID(), newUser)
+  }
   return next(ctx)
 }
 

@@ -12,6 +12,7 @@ const model = new Schema({
   firstName: { type: String },
   lastName: { type: String },
   username: { type: String },
+  idAutoAddEnabled: { type: Boolean, default: true },
 }, { minimize: false, toObject: { virtuals: true }, toJSON: { virtuals: true } });
 
 module.exports = mongoose.model('Chat', model);

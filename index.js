@@ -38,6 +38,8 @@ Or choose from the dropdown menu which is promted when you type @localtime_bot.
 Admins can use /settimezone {timezone} @username to set timezone for any user in the group (if user has not set it already).
 Use /listtimezones {filter} to list timezones. only 9 items shown at most to reduce cluttering the chat.
 Use /settimeformat {format} to specify whether you want 24 or 12 (AM/PM) based time format (Example of the command: /settimeformat 24 or /settimeformat 12).
+Use /enableautoadd to enable auto add functionality. Any user in the chat will be added (if location is set for the user) to the lists and will be shown when /lt or /ltall commands are used (enabled by default)
+Use /disableautoadd to disable auto add functionality. Admin need to add users manually
 Use /add - to add a user to this chat (example: /add Teddy Europe/Berlin)
 Use /feedback {message} to send me any feedback :)
 `
@@ -57,6 +59,30 @@ tzs = tzs.sort((a, b) => {
   if (an > bn) return 1
   else if (an < bn) return -1
   else return 0
+})
+
+bot.command(['enableautoadd', 'enableautoadd@localtime_bot'], async (ctx) => {
+  const admin = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
+  if (admin.status !== 'creator' && admin.status !== 'administrator') {
+    return ctx.reply(`only creator or administrators enable auto add`)
+  }
+  const chat = await ctx.getOneChat(ctx.getChatID())
+  if (chat.isAutoAddEnabled) return ctx.reply(`auto add already enabled`)
+  const enabled = await chat.enableAutoAdd(chat);
+  if (enabled) return ctx.reply(`could not enable auto add`)
+  ctx.reply(`successfully enabled auto add`)
+})
+
+bot.command(['disableautoadd', 'disableautoadd@localtime_bot'], async (ctx) => {
+  const admin = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
+  if (admin.status !== 'creator' && admin.status !== 'administrator') {
+    return ctx.reply(`only creator or administrators can disable auto add`)
+  }
+  const chat = await ctx.getOneChat(ctx.getChatID())
+  if (chat.isAutoAddEnabled === false) return ctx.reply(`auto add already disabled`)
+  const enabled = await chat.disableAutoAdd(chat);
+  if (enabled) return ctx.reply(`could not disable auto add`)
+  ctx.reply(`successfully disabled auto add`)
 })
 
 bot.command(['listtimezones', 'listtimezones@localtime_bot'], async (ctx) => {
@@ -128,10 +154,19 @@ bot.command(['add', 'add@localtime_bot'], async (ctx) => {
   if (messageArray.length < 3) {
     return ctx.reply(`please use this format: /add {prefered username} {timezone}. (e.g.: /add Teddy Europe/Berlin)`)
   }
+  const admin = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
+  if (admin.status !== 'creator' && admin.status !== 'administrator') {
+    return ctx.reply(`only creator or administrators can add members`)
+  }
   const chat = await ctx.getOneChat(ctx.getChatID())
   let prefix = chat.username || chat.title || chat.firstName || chat.lastName
   if (!prefix) prefix = Math.floor(100000000 + Math.random() * 900000000)
-  const username = `(${prefix}) ${messageArray[1]}`
+  let providedUsername = messageArray[1]
+  if (providedUsername === undefined || providedUsername.length === 0) {
+    return ctx.reply('username is empty')
+  }
+  providedUsername = providedUsername.trim()
+  const username = `(${prefix}) ${providedUsername}`
   const timezone = messageArray[2]
   if (!!!mtz.tz.zone(timezone)) {
     return ctx.reply(`${timezone} is not a valid timezone`)
@@ -153,20 +188,21 @@ bot.command(['remove', 'remove@localtime_bot'], async (ctx) => {
   if (messageArray.length < 2) {
     return ctx.reply(`please use this format: /remove {username}. (e.g.: /remove Teddy)`)
   }
-  const username = ctx.message.text.substring("remove ".length + 1)
-  let user = await ctx.getUserByUsername(username)
-  if (!user) {
-    return ctx.reply(`no such user`)
+  const admin = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
+  if (admin.status !== 'creator' && admin.status !== 'administrator') {
+    return ctx.reply(`only creator or administrators can remove members`)
   }
+  let username = ctx.message.text.substring("remove ".length + 1)
+  username = username.trim()
+  let user = await ctx.getUserByUsername(username)
+  if (!user) return ctx.reply(`no such user`)
   const isMemberOf = await ctx.isMemberOf(user.userId, ctx.getChatID())
   if (!isMemberOf) {
     return ctx.reply(`cannot remove: user is not added to this chat`)
   }
-  const userId = '' + user.userId
-  if (userId.substring(0, 5) != 11111) {
-    return ctx.reply(`cannot remove: is not manually added`)
-  }
+
   await ctx.removeFromChatAll(ctx.getChatID(), user)
+  await ctx.removeFromChatActive(ctx.getChatID(), user)
   return ctx.replyWithHTML(`user <b>${user.username}</b> is succesfully removed from this chat`)
 })
 
@@ -192,7 +228,7 @@ bot.command(['settimezone', 'settimezone@localtime_bot'], async (ctx) => {
   if (messageArray.length === 3) {
     const admin = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
     if (admin.status !== 'creator' && admin.status !== 'administrator') {
-      return ctx.reply(`only admins can set timezone for members`)
+      return ctx.reply(`only creator or administratorss can set timezone for members`)
     }
     const username = messageArray[2]
     // TODO: get only for this group
@@ -387,7 +423,7 @@ bot.hears(/^\/sendtoall/ig, async (ctx) => {
   }
 })
 
-// bot.telegram.setWebhook(`https://4fbff081.ngrok.io/bot`)
+// bot.telegram.setWebhook(`https://localtime.ngrok.io/bot`)
 bot.telegram.setWebhook(`https://localtime.xyz/bot`)
 
 
