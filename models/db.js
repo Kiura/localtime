@@ -388,7 +388,7 @@ module.exports = async function (ctx, next) {
   if (ctx.chat && !exists) {
     await ctx.createChat({ ...ctx.chat, chatId: ctx.chat.id })
   }
-  const chat = ctx.getOneChat(ctx.geyChatID())
+  const chat = ctx.getOneChat(ctx.getChatID())
 
   const u = await ctx.getOneUser()
   if (u && chat && (chat.isAutoAddEnabled === undefined || chat.isAutoAddEnabled)) {
