@@ -206,7 +206,7 @@ exportDB.addToChatAll = async function (chID, user) {
 
 exportDB.removeFromChatAll = async function (chID, user) {
   const chat = await this.getChatAll(chID)
-  if (!chat) return
+  if (!chat) return false
 
   let removed = false
   for (let i = chat.members.length - 1; i >= 0; --i) {
@@ -216,19 +216,20 @@ exportDB.removeFromChatAll = async function (chID, user) {
       break
     }
   }
-  if (!removed) return
+  if (!removed) return false
 
   try {
     await chat.save()
   } catch (err) {
     console.log(`cannot remove from the group: ${err}`)
-    return
+    return false
   }
+  return true
 }
 
 exportDB.removeFromChatActive = async function (chID, user) {
   const chat = await this.getChatActive(chID)
-  if (!chat) return
+  if (!chat) return false
 
   let removed = false
   for (let i = chat.active.length - 1; i >= 0; --i) {
@@ -238,14 +239,16 @@ exportDB.removeFromChatActive = async function (chID, user) {
       break
     }
   }
-  if (!removed) return
+  if (!removed) return false
 
   try {
     await chat.save()
   } catch (err) {
     console.log(`cannot remove from the group: ${err}`)
-    return
+    return false
   }
+  
+  return true
 }
 
 exportDB.addToChatActive = async function (chID, user) {
