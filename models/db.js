@@ -400,7 +400,7 @@ module.exports = async function (ctx, next) {
   const user = await ctx.getChatMember(ctx.getUserID()).catch(() => false)
   if (!user) return next(ctx)
   const newUser = await ctx.createUser({ ...user.user, userId: user.id, status: user.status })
-  console.log(ctx.getChatID() && chat && (chat.isAutoAddEnabled === undefined || chat.isAutoAddEnabled)))
+  console.log(ctx.getChatID() && chat && (chat.isAutoAddEnabled === undefined || chat.isAutoAddEnabled))
   console.log(ctx.getChatID(), chat, chat.isAutoAddEnabled === undefined, chat.isAutoAddEnabled)
   if (chat && (chat.isAutoAddEnabled === undefined || chat.isAutoAddEnabled)) {
     await ctx.addToChatActive(ctx.getChatID(), newUser)
