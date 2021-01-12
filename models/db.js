@@ -7,7 +7,7 @@ const User = require(`./user`)
 const Chat = require(`./chat`)
 
 const mongourl = process.env.MONGO_URL || `mongodb+srv://user:password@website.com/test?retryWrites=true&w=majority`
-mongoose.connect(mongourl, { useNewUrlParser: true, useCreateIndex: true })
+mongoose.connect(mongourl, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true })
 const db = mongoose.connection
 let IS_DB_READY = false
 db.on('error', (err) => {
