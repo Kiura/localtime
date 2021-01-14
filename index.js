@@ -201,10 +201,8 @@ bot.command(['remove', 'remove@localtime_bot'], async (ctx) => {
     return ctx.reply(`cannot remove: user is not added to this chat`)
   }
 
-  let removed = await ctx.removeFromChatAll(ctx.getChatID(), user)
-  if (!removed) return ctx.reply('cannot remove user | internal error')
-  removed = await ctx.removeFromChatActive(ctx.getChatID(), user)
-  if (!removed) return ctx.reply('cannot remove user | internal error')
+  await ctx.removeFromChatAll(ctx.getChatID(), user)
+  await ctx.removeFromChatActive(ctx.getChatID(), user)
   return ctx.replyWithHTML(`user <b>${user.username}</b> is succesfully removed from this chat`)
 })
 
