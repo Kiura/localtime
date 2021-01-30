@@ -193,7 +193,11 @@ exportDB.addToChatAll = async function (chID, user) {
       includes = true
     }
   }
-  if (includes) return
+  if (includes || !user.timezone || user.timezone == '') return
+  if (chat.members.length > 100) {
+    const u = chat.members.shift()
+    console.log(`removed from members: ${u}`)
+  }
   chat.members.push(user)
 
   try {

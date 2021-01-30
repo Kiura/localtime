@@ -4,7 +4,7 @@
   "description": "Makes it easy to chat with people from all over the globe",
   "main": "index.js",
   "scripts": {
-    "start": "pm2 start index.js --name localtime",
+    "start": "NODE_ENV='production' pm2 start index.js --name localtime --update-env",
     "stop": "pm2 stop localtime",
     "delete": "pm2 delete localtime"
   },
