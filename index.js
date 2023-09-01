@@ -303,7 +303,7 @@ bot.command(['ltu', 'ltu@localtime_bot'], async (ctx) => {
   }
   try {
     const currentUser = await ctx.getOneUser(ctx.getUserID())
-    await ctx.incActivityUsageCount(currentUser.userId)
+    await ctx.incActivityUsageCount(currentUser._id)
   } catch(e) {
     console.log(e)
   }
@@ -367,7 +367,7 @@ async function showLocaltime(ctx, all) {
   }
   try {
     const currentUser = await ctx.getOneUser(ctx.getUserID())
-    await ctx.incActivityUsageCount(currentUser.userId)
+    await ctx.incActivityUsageCount(currentUser._id)
   } catch(e) {
     console.log(e)
   }
