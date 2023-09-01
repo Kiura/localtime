@@ -403,6 +403,28 @@ bot.hears(/\/lt\b|\/at\b/ig, async (ctx) => {
   await showLocaltime(ctx, false)
 })
 
+bot.hears(/^\/sendtest/ig, async (ctx) => {
+  if (ctx.getUserID() != eleutheromaniac95) return ctx.reply(`you are not allowed to use this command`)
+  const messageArray = ctx.message.text.split(` `)
+  if (messageArray.length < 2) {
+    return ctx.reply(`empty message`)
+  }
+  const message = ctx.message.text.substring(10, ctx.message.text.length)
+
+  try {
+      bot.telegram.sendMessage(eleutheromaniac95, message, {
+        parse_mode: `MarkdownV2`
+      })
+  } catch (e) {
+    console.log(e)
+  }
+})
+
+function sleep(ms) {
+    // add ms millisecond timeout before promise resolution
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 bot.hears(/^\/sendtoall/ig, async (ctx) => {
   if (ctx.getUserID() != eleutheromaniac95) return ctx.reply(`you are not allowed to use this command`)
   const messageArray = ctx.message.text.split(` `)
@@ -413,10 +435,14 @@ bot.hears(/^\/sendtoall/ig, async (ctx) => {
 
   try {
     const users = await ctx.getUsers()
+    let i = 0;
     for (const user of users) {
+      i++;
+      await sleep(200);
       bot.telegram.sendMessage(user.userId, message, {
         parse_mode: `MarkdownV2`
       })
+      console.log("sent to", user.userId, i)
     }
   } catch (e) {
     console.log(e)
