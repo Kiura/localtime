@@ -301,6 +301,9 @@ bot.command(['ltu', 'ltu@localtime_bot'], async (ctx) => {
   if (localTime) {
     time = moment(localTime).tz(user.timezone).format(format)
   }
+  try {
+    await ctx.incActivityUsageCount(user.userId)
+  } catch(e) {}
   return ctx.replyWithHTML(`⏰ <b>${time}</b> ${user.flag || ''} ${ctx.getName(user)}`)
 })
 
@@ -359,6 +362,10 @@ async function showLocaltime(ctx, all) {
     message += `⏰ <b>${ut.time.format(format)}</b> ${ut.user.flag || ''} ${ctx.getName(ut.user)}
 `
   }
+  try {
+    const currentUser = await ctx.getOneUser(ctx.getUserID())
+    await ctx.incActivityUsageCount(currentUser.userId)
+  } catch(e) {}
   if (message === ``) {
     return ctx.reply(`No user has set timezone in this group`)
   }

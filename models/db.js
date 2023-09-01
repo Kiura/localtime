@@ -5,6 +5,7 @@ const ct = require(`countries-and-timezones`)
 const getCountryISO2 = require(`country-iso-3-to-2`)
 const User = require(`./user`)
 const Chat = require(`./chat`)
+const Activity = require(`./activity`)
 
 const mongourl = process.env.MONGO_URL || `mongodb+srv://user:password@website.com/test?retryWrites=true&w=majority`
 mongoose.connect(mongourl, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true })
@@ -84,6 +85,39 @@ exportDB.createUser = async function (user) {
     console.log(`unable to save user: ${err}`)
   }
   return u
+}
+
+exportDB.createActivity = async function (userId) {
+  if (!this.isDBReady()) return
+  if (!activityId) return
+  const a = new Activity({
+    userId: userId,
+    usageCount: 0,
+  })
+  try {
+    await a.save()
+  } catch (err) {
+    console.log(`unable to save activity: ${err}`)
+  }
+  return a
+}
+
+exportDB.incActivityUsageCount = async function (userId) {
+  if (!this.isDBReady()) return
+  if (!userId) {
+    console.log(`cannot find user to inc usage count`)
+    return
+  }
+  let a = await Activity.findOne({ userId: userId })
+  if (!a) {
+    a = await this.createActivity(userId)
+    if (!a) {
+      console.log(`cannot inc usage request`)
+      return
+    }
+  }
+  a.usageCount++
+  await a.save()
 }
 
 exportDB.getUsers = async function () {
@@ -366,6 +400,8 @@ module.exports = async function (ctx, next) {
   ctx.getUserID = exportDB.getUserID
   ctx.editUser = exportDB.editUser
   ctx.createUser = exportDB.createUser
+  ctx.createActivity = exportDB.createActivity
+  ctx.incActivityUsageCount = exportDB.incActivityUsageCount
   ctx.getUsers = exportDB.getUsers
   ctx.getChats = exportDB.getChats
   ctx.getOneUser = exportDB.getOneUser
