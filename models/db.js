@@ -89,7 +89,7 @@ exportDB.createUser = async function (user) {
 
 exportDB.createActivity = async function (userId) {
   if (!this.isDBReady()) return
-  if (!activityId) return
+  if (!userId) return
   const a = new Activity({
     userId: userId,
     usageCount: 0,
